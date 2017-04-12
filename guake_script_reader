@@ -1,0 +1,761 @@
+#!/bin/bash
+#
+# @author Zeus Intuivo <zeus@intuivo.com>
+#
+#Notes on Vagrant
+#-t will exit immediately
+#-c does not exit
+#vagrant ssh -t 'sudo service nginx stop && /etc/init.d/pumacontrol.sh start'
+#vagrant ssh -c 'sudo service nginx stop && /etc/init.d/pumacontrol.sh start'
+YOUR_USER_NAME="vagrant"
+PRIVATE_ADMIN_RAILS_DEVELOPER_EMAIL="some_developer@github.com"
+YOUR_VAGRANT_BOX_LOCATION="/_/boxes/branced_weise.box"
+YOUR_PROJECT_LOCATION="/_/weise"
+SERVER_NAME_EXPECTED="puma.weise.box"
+script="
+
+box#{
+	export COLUMNS=190
+	cd ${YOUR_VAGRANT_BOX_LOCATION}
+	branches -l
+	free -g
+	#su - ${YOUR_USER_NAME} -c \"cd ${YOUR_VAGRANT_BOX_LOCATION}; zsh \"
+	su  ${YOUR_USER_NAME}
+	cd ${YOUR_VAGRANT_BOX_LOCATION}
+	zsh
+	git status -sb
+	xrandr --current --verbose | grep \" connected\" | cut -d\" \" -f1 | xargs -I {} xrandr --output {}   --brightness .5
+}#
+
+guake_script#{
+	export COLUMNS=190
+	cd ${YOUR_VAGRANT_BOX_LOCATION}
+	branches -l
+	free -g
+	su ${YOUR_USER_NAME}
+	cd /_/clis/guake_intuivo_cli
+	zsh
+	/_/clis/guake_intuivo_cli/guake_script_reader -t
+}#
+
+
+puma up#{
+	cd ${YOUR_VAGRANT_BOX_LOCATION}
+	#sudo -u ${YOUR_USER_NAME} -H zsh << EOF
+	su ${YOUR_USER_NAME}
+	export COLUMNS=190
+	TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2
+	cd ${YOUR_VAGRANT_BOX_LOCATION}
+	WHOISTHIS_SUPPOSED_TO_BE=\"${YOUR_USER_NAME}\"
+	WHOISTHIS=\"\$(whoami)\"
+	[[ -z \"\${WHOISTHIS_SUPPOSED_TO_BE}\" ]] && echo -e \" - \\033[38;5;1m AUTOMATION ERROR - \\033[0m \n - This is supposed to be any \\033[38;5;24m user_name \\033[0m \n - but I got an \\033[38;5;1m  empty value \\033[0m \n - I am operating as: \\033[38;5;1m  \"\${WHOISTHIS}\"  \\033[0m \"
+	[[ \"\${WHOISTHIS}\" != \"\${WHOISTHIS_SUPPOSED_TO_BE}\" ]] && echo -e \" - \\033[38;5;1m AUTOMATION ERROR - \\033[0m \n - This is supposed to be user \\033[38;5;1m \"\${WHOISTHIS_SUPPOSED_TO_BE}\"  \\033[0m \n - but instead I am working as: \\033[38;5;1m  \"\${WHOISTHIS}\"  \\033[0m \"
+
+	[[ -f .vagrant/machines/default/virtualbox/creator_uid ]] && VAGRANT_CREATORID_CREATED_MACHINE=\"\$(<.vagrant/machines/default/virtualbox/creator_uid)\"
+	[[ ! -f .vagrant/machines/default/virtualbox/creator_uid ]] &&  echo -e \" - \\033[38;5;1m AUTOMATION ERROR - \\033[0m \n - I cannot find file \\033[38;5;1m .vagrant/machines/default/virtualbox/creator_uid  \\033[0m \"
+	VAGRANT_CREATORID=\"\$(id -u \$USER)\"
+	[[ \"\${VAGRANT_CREATORID}\" != \"\${VAGRANT_CREATORID_CREATED_MACHINE}\" ]] && echo -e \" - \\033[38;5;1m AUTOMATION ERROR - \\033[0m \n - Creator of machine was supposed to be creator id  \\033[38;5;1m \"\${VAGRANT_CREATORID_CREATED_MACHINE}\"  \\033[0m \n - but instead I am working with creator id: \\033[38;5;1m  \"\${VAGRANT_CREATORID}\"  \\033[0m \"
+	[[ -f .vagrant/machines/default/virtualbox/creator_uid ]] && [[ \"\${VAGRANT_CREATORID}\" != \"\${VAGRANT_CREATORID_CREATED_MACHINE}\" ]] && echo -e \" - \\033[38;5;1m FORCING ID - \\033[0m  Attempting to overwrite creator id with \\033[38;5;1m \"\${VAGRANT_CREATORID}\"  \\033[0m \" && echo \${VAGRANT_CREATORID} > .vagrant/machines/default/virtualbox/creator_uid
+
+	##vagrant ssh -c 'sudo service nginx stop; pwd; cd ${YOUR_PROJECT_LOCATION}; git checkout feature/devbox; cd config; pwd; ü weise.box; sudo cp -vRfr server/etc /; sudo mkdir -p /vagrant/config/; sudo cp -vRfr server/etc /vagrant/config/; sudo /etc/init.d/pumacontrol.sh start'
+
+	#vagrant ssh -c 'TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2; sudo service nginx stop; pwd; sudo cp -vRfr /vagrant/config/server/etc /; sudo cp -vRfr /vagrant/config/server ${YOUR_PROJECT_LOCATION}/config/; cd ${YOUR_PROJECT_LOCATION}; sudo /etc/init.d/pumacontrol.sh start'
+	vagrant ssh
+	TERM=\"$TERM\";
+	echo TERM is \"\$TERM\" >&2;
+	sudo service nginx stop;
+	pwd;
+	sudo cp -vRfr /vagrant/config/server/etc /;
+	sudo cp -vRfr /vagrant/config/server ${YOUR_PROJECT_LOCATION}/config/;
+	cd ${YOUR_PROJECT_LOCATION};
+	sudo /etc/init.d/pumacontrol.sh start && sudo -u ${YOUR_USER_NAME} -H zsh << EOF
+
+	##vagrant ssh -c 'cd ${YOUR_PROJECT_LOCATION}; sudo /etc/init.d/pumacontrol.sh status; zsh'
+	WHOISTHIS=\"\$(whoami)\"
+	[[ \"\${WHOISTHIS}\" == \"\vagrant\" ]] && exit
+	WHOISTHIS_SUPPOSED_TO_BE=\"${YOUR_USER_NAME}\"
+	WHOISTHIS=\"\$(whoami)\"
+	[[ \"\${WHOISTHIS}\" == \"\${WHOISTHIS_SUPPOSED_TO_BE}\" ]] &&  cd ${YOUR_VAGRANT_BOX_LOCATION}; vagrant halt
+	zsh
+EOF
+	# su - ${YOUR_USER_NAME} -c \"export COLUMNS=190; cd ${YOUR_VAGRANT_BOX_LOCATION}; vagrant halt \"
+	#su - ${YOUR_USER_NAME} -c \"cd ${YOUR_VAGRANT_BOX_LOCATION}; vagrant ssh -c 'sudo service nginx stop && /etc/init.d/pumacontrol.sh start' && vagrant ssh \"
+	# Fall back if server did not start
+	# su - ${YOUR_USER_NAME} -c \"export COLUMNS=190; cd ${YOUR_VAGRANT_BOX_LOCATION}; vagrant ssh \"
+	# Fall back if vagrant did not start
+	# su - ${YOUR_USER_NAME} -c \"export COLUMNS=190; cd ${YOUR_VAGRANT_BOX_LOCATION}; free -g; zsh\"
+ }#
+
+
+logs#{
+
+	#su - ${YOUR_USER_NAME} -c \"export COLUMNS=190;TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2; cd ${YOUR_VAGRANT_BOX_LOCATION}; vagrant ssh -c 'grc tail -f log/development.log;' \"
+
+	su ${YOUR_USER_NAME}
+	export COLUMNS=190;
+	TERM=\"$TERM\";
+	echo TERM is \"\$TERM\" >&2;
+	cd ${YOUR_VAGRANT_BOX_LOCATION};
+	vagrant ssh
+	ping ${SERVER_NAME_EXPECTED} -c20 && grc tail -f log/development.log && zsh
+
+	# Fall back if vagrant did not start
+	# su - ${YOUR_USER_NAME} -c \"export COLUMNS=190; TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2; cd ${YOUR_PROJECT_LOCATION}; free -g; zsh\"
+}#
+
+/#{
+	su ${YOUR_USER_NAME}
+	#sudo -u ${YOUR_USER_NAME} -H zsh << EOF
+
+#EOF
+	# Fall back second try
+	# su - ${YOUR_USER_NAME} -c \"export COLUMNS=190; TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2; cd ${YOUR_VAGRANT_BOX_LOCATION}; vagrant ssh -c 'sudo service nginx start && sudo service nginx status && ping ${SERVER_NAME_EXPECTED} -c20 && curl -I http://${SERVER_NAME_EXPECTED} | head -1; zsh'\"
+	# Fall back if -c commnad did not stay
+	# su - ${YOUR_USER_NAME} -c \"export COLUMNS=190; cd ${YOUR_VAGRANT_BOX_LOCATION}; vagrant ssh \"
+
+
+	# Fall bak is everthing fail try to go in as vagrant ssh as from root
+	# cd ${YOUR_VAGRANT_BOX_LOCATION}
+	# vagrant ssh
+
+	# Fall back if vagrant did not start
+	# su - ${YOUR_USER_NAME} -c \"export COLUMNS=190; cd ${YOUR_PROJECT_LOCATION}; free -g; zsh\"
+
+	export COLUMNS=190;
+	TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2
+	cd ${YOUR_VAGRANT_BOX_LOCATION}
+	vagrant ssh && zsh
+
+	ping ${SERVER_NAME_EXPECTED} -c5 && sudo service nginx start && sudo service nginx status && ping ${SERVER_NAME_EXPECTED} -c2
+	curl -I http://${SERVER_NAME_EXPECTED}
+	# Fall back is vagrant ssh -c did not stay
+	zsh
+}#
+
+rails c#{
+	su ${YOUR_USER_NAME}
+	#su - ${YOUR_USER_NAME} -c \"TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2; cd ${YOUR_VAGRANT_BOX_LOCATION}; vagrant ssh -c 'ping ${SERVER_NAME_EXPECTED} -c5 && cd ${YOUR_PROJECT_LOCATION}; rails c' \"
+	# Fall back if vagrant did not start
+	# su - ${YOUR_USER_NAME} -c \"export COLUMNS=190; TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2; cd ${YOUR_PROJECT_LOCATION}; free -g; zsh\"	su ${YOUR_USER_NAME}
+	export COLUMNS=190;
+	TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2;
+	cd ${YOUR_VAGRANT_BOX_LOCATION};
+	vagrant ssh
+	ping ${SERVER_NAME_EXPECTED} -c5
+	cd ${YOUR_PROJECT_LOCATION};
+	rails c && zsh
+	AdminUser.all.each do |x| puts x.email ;  end
+	user = AdminUser.find_by({email:'$PRIVATE_ADMIN_RAILS_DEVELOPER_EMAIL'})
+	user.role='admin'
+	user.save!
+
+}#
+
+
+mongo#{
+	#su - ${YOUR_USER_NAME} -c \"export COLUMNS=190; TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2; cd ${YOUR_VAGRANT_BOX_LOCATION}; vagrant ssh -c 'ping ${SERVER_NAME_EXPECTED} -c5 && mongo' \"
+	# Fall back if vagrant did not start
+	# su - ${YOUR_USER_NAME} -c \"export COLUMNS=190; TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2; cd ${YOUR_PROJECT_LOCATION}; free -g; zsh\"
+
+	su ${YOUR_USER_NAME}
+	export COLUMNS=190;
+	TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2;
+	cd ${YOUR_VAGRANT_BOX_LOCATION};
+	vagrant ssh
+	ping ${SERVER_NAME_EXPECTED} -c5
+	mongo && zsh
+	show dbs;
+}#
+
+weise2#{
+	#sudo -u ${YOUR_USER_NAME} -H zsh << EOF
+#EOF
+	# Fall back if vagrant did not start
+	#su - ${YOUR_USER_NAME} -c \"export COLUMNS=190; TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2; cd ${YOUR_PROJECT_LOCATION}2; free -g; zsh\"
+
+	su ${YOUR_USER_NAME}
+	export COLUMNS=190
+	TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2
+	cd ${YOUR_PROJECT_LOCATION}2
+	branches -l
+	free -g
+	zsh
+}#
+
+weise#{
+	#sudo -u ${YOUR_USER_NAME} -H zsh << EOF
+#EOF
+	# Fall back if vagrant did not start
+	#su - ${YOUR_USER_NAME} -c \"export COLUMNS=190; TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2; cd ${YOUR_PROJECT_LOCATION}; free -g; zsh\"
+
+	su ${YOUR_USER_NAME}
+	export COLUMNS=190
+	TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2
+	cd ${YOUR_PROJECT_LOCATION}
+	branches -l
+	free -g
+	zsh
+}#
+
+clis#{
+	#sudo -u ${YOUR_USER_NAME} -H zsh << EOF
+#EOF
+	#su - ${YOUR_USER_NAME} -c \"export COLUMNS=190; TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2; cd /_/clis; subdir_git_status; zsh\"
+
+	su ${YOUR_USER_NAME}
+	export COLUMNS=190
+	TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2
+	cd /_/clis
+	subdir_git_status
+	zsh
+}#
+"
+#echo "$script";
+#exit
+# FIX VISUDO REF: https://stackoverflow.com/questions/21659637/how-to-fix-sudo-no-tty-present-and-no-askpass-program-specified-error
+
+function obtain_with_spaces_between() {
+  local PIPED COLORED COUNTER ONEPIPE
+  local from1 to2 a filename
+  PIPED="";
+  COLORED="";
+  COUNTER=0;
+
+  if [ -t 0 ]; then  # Do stuff with NO PIPE
+  {
+
+      PIPED=""
+
+      # Execution part - Start
+      # Sample use:
+      #             echo "'continue_confirm_start.m  033[0m from develop.BASEBRANCH.' " > .description
+      #             obtain_with_spaces_between "from" ".BASEBRANCH." .description
+
+      # Technique from:
+      # REF: https://unix.stackexchange.com/questions/243207/how-can-i-delete-everything-until-a-pattern-and-everything-after-another-pattern
+      #test: Working sample
+      #from1="If you come"; to2="Example aliases"; a="$(cat ~/.zshrc)"; a="$(echo "${a#*"$from1"}")"; echo "$from1${a%%"$to2"*}$to2"
+
+      from1="${1}";
+      to2="${2}";
+      filename="${3}"
+      if [[ ! -f "${filename}" ]] ; then
+      {
+        echo "ERROR !!! Filename: ${filename} does not exist"
+        return 1;
+        #return 0
+      }
+      fi
+      a="""$(<${filename})""";
+      a="""$(echo """${a#*"$from1"}""")""";
+      #echo "$from1${a%%"$to2"*}$to2" # returns the side handles between
+      echo """${a%%"""$to2"""*}"""  # gets spaces
+      #echo ${a%%"$to2"*}  # trims spaces
+      # Execution part - End
+
+  }
+  else               # Do sutff with WITH YES PIPE the contents piped passed
+  {
+
+      PIPED="YES"
+      PIPED=""
+      while read ONEPIPE; do
+      {
+
+          if [ -z "${PIPED}" ]; then     # When pipe if empty, start var
+          {
+            PIPED="""${ONEPIPE}"""
+          }
+          else                           # When it has something keep adding
+          {
+            PIPED="""${PIPED}
+${ONEPIPE}"""
+          }
+          fi
+          COUNTER=$((COUNTER+1))
+      }
+      done
+      if [ $COUNTER -eq 0 ]; then   # If there is not contents then exit silently
+        return 1;
+      fi
+
+      ##Executiong part - Start
+      # Sample use:
+      #        cat .description | obtain_with_spaces_between "from" ".BASEBRANCH."
+      #        echo "ew_field_autoconfirm_start.m  033[0m from develop.BASEBRANCH.'" | obtain_with_spaces_between "from" ".BASEBRANCH."
+
+      # Technique from:
+      # REF: https://unix.stackexchange.com/questions/243207/how-can-i-delete-everything-until-a-pattern-and-everything-after-another-pattern
+      #test: Working sample
+      #from1="If you come"; to2="Example aliases"; a="$(cat ~/.zshrc)"; a="$(echo "${a#*"$from1"}")"; echo "$from1${a%%"$to2"*}$to2"
+
+      from1="${1}";
+      to2="${2}";
+      a="""${PIPED}""";
+      a="""$(echo "${a#*"$from1"}")""";
+      #echo "$from1${a%%"$to2"*}$to2" # returns the side handles between
+      echo """${a%%"$to2"*}"""  # gets spaces
+      #echo ${a%%"$to2"*}  # trims spaces
+      ##Executiong part - End
+  }
+  fi
+}
+enter_encode() {
+	#sed ':a;N;$!ba;s/\n/0N33NT3R/g'  # GNU sed
+	sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/0N33NT3R/g'  #  cross-platform compatible syntax which works with BSD sed
+}
+enter_decode() {
+	sed 's/0N33NT3R/\n/g'
+}
+enters_to_semicolon_space() {
+	#sed ':a;N;$!ba;s/\n/; /g' # GNU sed
+	sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/; /g'  #  cross-platform compatible syntax which works with BSD sed
+}
+enters_to_and_and() {
+	#sed ':a;N;$!ba;s/\n/ && /g' # GNU sed
+	sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/ \&\& /g'  #  cross-platform compatible syntax which works with BSD sed
+}
+enter_first_only_removed() {
+	#sed ':a;N;$!ba;s/^\n//g' # GNU sed
+	sed -e ':a' -e 'N' -e '$!ba' -e 's/^\n//g'  #  cross-platform compatible syntax which works with BSD sed
+}
+enter_last_only_removed() {
+	#sed ':a;N;$!ba;s/\n$//g' # GNU sed
+	sed -e ':a' -e 'N' -e '$!ba' -e 's/\n$//g'  #  cross-platform compatible syntax which works with BSD sed
+}
+space_encode() {
+	sed 's/\ /5P4C3/g'
+}
+space_decode() {
+	sed 's/5P4C3/\ /g'
+}
+
+plus_encode() {
+    sed 's/\+/0N3PLU5/g'
+}
+plus_decode() {
+    sed 's/0N3PLU5/\+/g'
+}
+
+equal_encode() {
+    sed 's/\=/3QU4L5I6N/g'
+}
+equal_decode() {
+    sed 's/3QU4L5I6N/\=/g'
+}
+
+colon_encode() {
+	sed 's/[:]/D0U8L3D0T5/g'
+}
+colon_decode(){
+	sed 's/D0U8L3D0T5/\:/g'
+}
+
+semicolon_encode() {
+	sed 's/[;]/53M1C070N/g'
+}
+semicolon_decode(){
+	sed 's/53M1C070N/\;/g'
+}
+
+pipe_encode() {
+	sed 's/[|]/0N3P1P3/g'
+}
+pipe_decode() {
+	sed 's/0N3P1P3/\|/g'
+}
+
+
+money_encode() {
+	sed 's/[$]/D0LL4R51GN/g'
+}
+money_decode() {
+	sed 's/D0LL4R51GN/\$/g'
+}
+
+
+more_than_encode() {
+    sed 's/""">"""/M0R3TH4N/g'
+}
+more_than_decode() {
+    sed 's/M0R3TH4N/\>/g'
+}
+
+less_than_encode() {
+    sed 's/"""<"""/L3S5TH4N/g'
+}
+less_than_decode() {
+    sed 's/L3S5TH4N/\</g'
+}
+
+double_quotes_encode() {
+    sed 's/\"/D0U8L3QU0T3S/g'
+}
+double_quotes_decode() {
+    sed 's/D0U8L3QU0T3S/\"/g'
+}
+
+single_quotes_encode() {
+    sed "s/'/51NGL3QU0T3/g"
+}
+single_quotes_decode() {
+    sed "s/51NGL3QU0T3/'/g"
+}
+
+squared_braket_open_encode() {
+    sed "s/\[/5QU4R3D8R4CK3T0P3N/g"
+}
+squared_braket_open_decode() {
+    sed "s/5QU4R3D8R4CK3T0P3N/\[/g"
+}
+
+squared_braket_close_encode() {
+    sed "s/\]/5QU4R3D8R4CK3TCL053/g"
+}
+squared_braket_close_decode() {
+    sed "s/5QU4R3D8R4CK3TCL053/\]/g"
+}
+
+curly_braket_open_encode() {
+    sed "s/\{/C6RL78R4CK3T0P3N/g"
+}
+curly_braket_open_decode() {
+    sed "s/C6RL78R4CK3T0P3N/\{/g"
+}
+
+
+curly_braket_close_encode() {
+    sed "s/\}/C6RL78R4CK3TCL053/g"
+}
+curly_braket_close_decode() {
+    sed "s/C6RL78R4CK3TCL053/\}/g"
+}
+
+arroba_encode() {
+    sed "s/\@/UN4AR7OB4/g"
+}
+arroba_decode() {
+    sed "s/UN4AR7OB4/\@/g"
+}
+
+ampersand_encode() {
+    sed "s/\&/4M73R54ND/g"
+}
+ampersand_decode() {
+    sed "s/4M73R54ND/\&/g"
+}
+
+bangs_encode() {
+    sed 's/\!/0N3B4NG/g'
+}
+bangs_decode() {
+    sed 's/0N3B4NG/\!/g'
+}
+
+dash_encode() {
+	sed 's/\-/0N3D45H/g'
+}
+dash_decode() {
+	sed 's/0N3D45H/\-/g'
+}
+underscore_encode() {
+	sed 's/\_/0N3UND3RD45H/g'
+}
+underscore_decode() {
+	sed 's/0N3UND3RD45H/\_/g'
+}
+
+tabs_remove() {
+	sed 's/\t//g'
+}
+tab_encode() {
+	sed 's/\t/T48B/g'
+}
+tab_decode() {
+	sed 's/T48B/\t/g'
+}
+
+backslash_encode() {
+	sed 's/\\/84CK5L45H/g'
+}
+backslash_decode() {
+	sed 's/84CK5L45H/\\/g'
+}
+
+forwardslash_encode() {
+	sed 's/\//F0RW4RD5L45H/g'
+}
+forwardslash_decode() {
+	sed 's/F0RW4RD5L45H/\//g'
+}
+
+dot_encode() {
+	sed 's/\./0N3D0T/g'
+}
+dot_decode() {
+	sed 's/0N3D0T/\./g'
+}
+
+delete_empty_lines() {
+    sed '/^\s*$/d'
+}
+
+disabled_encoding() {
+	echo "encoding" \
+	| echo "$0"
+}
+encode_script_to_save_spaces() {     # the order of decoding and encoding does matter
+	enter_encode \
+	| more_than_encode \
+	| less_than_encode \
+	| double_quotes_encode \
+	| single_quotes_encode \
+	| bangs_encode \
+	| plus_encode \
+	| equal_encode \
+	| space_encode \
+	| colon_encode \
+	| semicolon_encode \
+	| pipe_encode  \
+	| dash_encode \
+	| underscore_encode \
+	| money_encode \
+	| squared_braket_open_encode \
+	| squared_braket_close_encode \
+	| ampersand_encode \
+	| arroba_encode \
+	| tab_encode \
+	| backslash_encode \
+	| forwardslash_encode \
+	| dot_encode
+}
+disabled_decoding() {
+	echo "decoding" \
+	| echo "$0"
+}
+
+decode_script_from_saved_spaces() {
+	enter_decode \
+	| more_than_decode \
+	| less_than_decode \
+	| double_quotes_decode \
+	| single_quotes_decode \
+	| bangs_decode \
+	| plus_decode \
+	| equal_decode \
+	| space_decode \
+	| colon_decode \
+	| semicolon_decode \
+	| pipe_decode \
+	| colon_decode \
+	| dash_decode \
+	| underscore_decode \
+	| money_decode \
+	| squared_braket_open_decode \
+	| squared_braket_close_decode \
+	| ampersand_decode \
+	| arroba_decode \
+	| tab_decode \
+	| dot_decode \
+	| backslash_decode \
+	| forwardslash_decode
+}
+
+test_assert_get_develop_from_pipe() {
+	#tests assert to get: develop
+	#given the file contain this string "t.m  033[0m from develop.BASEBRAN"
+	echo "t.m  033[0m from develop.BASEBRAN" > /tmp/.demp
+	cat /tmp/.demp | obtain_with_spaces_between "from" ".BASEBRANCH."
+	rm /tmp/.demp
+	exit
+}
+test_assert_obtain_develop_from_file(){
+	#test assert to see : develop
+	echo "'continue_confirm_start.m  033[0m from develop.BASEBRANCH.' " > .description
+	obtain_with_spaces_between "from" ".BASEBRANCH." .description
+	exit
+}
+test_encode_decode() {
+	script="
+	puma up#{
+		cd \"/_/boxes/b ranced_weise.box\"
+		#! Shabangs
+		1 + 1 - = 40
+	WHOISTHIS_SUPPOSED_TO_BE=\"${YOUR_USER_NAME}\"
+	WHOISTHIS=\"\$(whoami)\"
+	[[ -z \"\${WHOISTHIS_SUPPOSED_TO_BE}\" ]] && echo -e \" - \\033[38;5;1m AUTOMATION ERROR - \\033[0m \n - This is supposed to be \\033[38;5;1m  a user_name \\033[0m \n - but I got \\033[38;5;1m  an empty value \\033[0m \n - I am operating as: \\033[38;5;1m  \"\${WHOISTHIS}\"  \\033[0m \"
+	[[ \"\${WHOISTHIS}\" != \"\${WHOISTHIS_SUPPOSED_TO_BE}\" ]] && echo -e \" - \\033[38;5;1m AUTOMATION ERROR - \\033[0m \n - This is supposed to be user \\033[38;5;1m \"\${WHOISTHIS_SUPPOSED_TO_BE}\"  \\033[0m \n - but instead I am working as: \\033[38;5;1m  \"\${WHOISTHIS}\"  \\033[0m \"
+
+	[[ -f .vagrant/machines/default/virtualbox/creator_uid ]] && VAGRANT_CREATORID_CREATED_MACHINE=\"\$(<.vagrant/machines/default/virtualbox/creator_uid)\"
+	[[ ! -f .vagrant/machines/default/virtualbox/creator_uid ]] &&  && echo -e \" - \\033[38;5;1m AUTOMATION ERROR - \\033[0m \n - I cannot find file \\033[38;5;1m .vagrant/machines/default/virtualbox/creator_uid  \\033[0m \"
+	VAGRANT_CREATORID=\"\$(id -u \$USER)\"
+	[[ \"\${VAGRANT_CREATORID}\" != \"\${VAGRANT_CREATORID_CREATED_MACHINE}\" ]] && echo -e \" - \\033[38;5;1m AUTOMATION ERROR - \\033[0m \n - Creator of machine was supposed to be creator id  \\033[38;5;1m \"\${VAGRANT_CREATORID_CREATED_MACHINE}\"  \\033[0m \n - but instead I am working with creator id: \\033[38;5;1m  \"\${VAGRANT_CREATORID}\"  \\033[0m \"
+	[[ -f .vagrant/machines/default/virtualbox/creator_uid ]] && [[ \"\${VAGRANT_CREATORID}\" != \"\${VAGRANT_CREATORID_CREATED_MACHINE}\" ]] && echo -e \" - \\033[38;5;1m FORCING ID - \\033[0m  Attempting to overwrite creator id with \\033[38;5;1m \"\${VAGRANT_CREATORID}\"  \" && echo \${VAGRANT_CREATORID} > .vagrant/machines/default/virtualbox/creator_uid
+
+	 }#"
+	echo "Original Code:"
+	echo """$script"""
+	echo "Encoded:"
+	encoded_script=$(echo """$script""" | encode_script_to_save_spaces)
+	echo """$encoded_script"""
+	echo "Decoded:"
+	echo """$encoded_script""" | decode_script_from_saved_spaces
+	exit
+}
+#test_encode_decode
+test_read_script_find_puma_title() {
+	#test
+	script="
+	puma up#{
+		cd \"/_/boxes/branced_weise.box\"
+		#! Shabangs
+		1 + 1 - = 40
+
+	 }#"
+	echo "Original Code:"
+	echo """$script"""
+	echo "Encoded:"
+	encoded_script=$(echo """$script""" | encode_script_to_save_spaces)
+	echo """$encoded_script"""
+	echo "Decoded:"
+	echo """$encoded_script""" | decode_script_from_saved_spaces
+	striped_contents=$(echo """$encoded_script""" | obtain_with_spaces_between "#{" "}#" )
+	echo """$striped_contents""" | decode_script_from_saved_spaces
+	cut_enconded_script=$(echo "$encoded_script"  | sed 's@'"""${striped_contents}"""'@@g')  ;
+	echo """$cut_enconded_script"""
+	echo """$cut_enconded_script""" | decode_script_from_saved_spaces
+	title_from_cut_encoded_script=$( echo """$cut_enconded_script""" | enter_decode | sed -n -e 's/^\(.*\)\(#{}#\)\(.*\)$/\1/p' )
+	#assert here that the result is TITLE IS: T48Bpuma5P4C3up
+	echo "TITLE IS:" """$title_from_cut_encoded_script"""
+	exit
+}
+#test_read_script_find_puma_title
+
+test_individual_sed_tests_of_interest() {
+	# this script gets #{}# from puma up#{}#    # REF: https://unix.stackexchange.com/questions/24140/return-only-the-portion-of-a-line-after-a-matching-pattern
+	echo "puma up#{}#" | sed -n -e 's/^.*up//p'
+
+	# this script get everything before #{}#
+	echo "puma asd asd asd  asdf asd#{}#" | sed -n -e 's/^\(.*\)\(#{}#\)\(.*\)$/\1/p'
+	exit
+}
+
+encoded_script=$(echo """$script""" | encode_script_to_save_spaces)
+LOOPING=1
+THINKING_MACHINE=0
+DEBUG_MACHINE=0
+[[ "${1}" == "--thinking-machine" ]] && THINKING_MACHINE=1
+while (( $LOOPING )); do
+{
+	(( $THINKING_MACHINE )) && echo "********"
+	(( $THINKING_MACHINE )) && echo "********"
+	(( $THINKING_MACHINE )) && echo "READING:${encoded_script}"
+    (( $THINKING_MACHINE )) && echo """$encoded_script""" | decode_script_from_saved_spaces                                                       # find the first occurrence
+	(( $THINKING_MACHINE )) && echo "********"
+	(( $THINKING_MACHINE )) && echo "********"
+	encoded_contents_found=$(echo """$encoded_script""" | obtain_with_spaces_between "#{" "}#" )
+
+	(( $THINKING_MACHINE )) && echo "encoded_contents_found:"
+	(( $THINKING_MACHINE )) && echo """$encoded_contents_found""" | decode_script_from_saved_spaces                                      #debug: decode only for printing
+
+
+	  				if (( $DEBUG_MACHINE )) && [[ "${trimmed_title_found}" == *"/"* ]] ; then
+					{
+						#set -eu
+						#set -o pipefail
+						set -x
+					}
+					fi
+	                                                                                                      # remove found content from global remaining contents
+
+
+	#encoded_script_wo_found_encoded_contents=$(echo "$encoded_script"  | sed 's@'"""${encoded_contents_found}"""'@@g')   # Below there the same expresion with "US" under sublime editor should appear
+	encoded_script_wo_found_encoded_contents=$(echo "$encoded_script"  | sed 's'"""${encoded_contents_found}"""'g')
+	  				if (( $DEBUG_MACHINE )) && [[ "${trimmed_title_found}" == *"/"* ]] ; then
+					{
+						#set -eu
+						#set -o pipefail
+						exit
+					}
+					fi
+	(( $THINKING_MACHINE )) && echo "encoded_script_wo_found_encoded_contents:"
+	(( $THINKING_MACHINE )) && echo """$encoded_script_wo_found_encoded_contents"""                                             #debug: print remaining text only for
+	(( $THINKING_MACHINE )) && echo """$encoded_script_wo_found_encoded_contents""" | decode_script_from_saved_spaces            #debug: decode so I can see it
+
+
+
+	                                                                                                      # obtain title that, I assume is left of this string #{}#
+	encoded_title_or_titles_found=$( echo """$encoded_script_wo_found_encoded_contents""" | enter_decode | sed -n -e 's/^\(.*\)\(#{}#\)\(.*\)$/\1/p')
+	(( $THINKING_MACHINE )) && echo "encoded_title_or_titles_found:"																								#debug: assert here that the result is TITLE IS: puma5P4C3up
+	(( $THINKING_MACHINE )) && echo "TITLE IS/ARE:" """$encoded_title_or_titles_found"""
+
+	# if there are two titles
+	COUNT_RESULTS=$(echo """$encoded_title_or_titles_found""" | wc -l)
+	(( $THINKING_MACHINE )) && echo "COUNT TITLES: $COUNT_RESULTS"
+
+	#Getting more than one title then it means I have duplicated content
+	COUNTER=0
+	while read -r encoded_title_found; do
+	{
+      # if not empty
+      if [ ! -z "${encoded_title_found}" ] ; then
+      {                                                                                                   # remove found title from global remaining contents
+		encoded_script_wo_found_encoded_title=$(echo "$encoded_script_wo_found_encoded_contents" | head -1 | sed 's@'"""${encoded_title_found}#{}#"""'@@g')
+		(( $THINKING_MACHINE )) && echo "encoded_script_wo_found_encoded_title:"
+		(( $THINKING_MACHINE )) && echo ":" """$encoded_script_wo_found_encoded_title"""
+		encoded_script_wo_found_encoded_title=$(echo "$encoded_script_wo_found_encoded_title"  | delete_empty_lines)
+	    (( $THINKING_MACHINE )) && echo "encoded_script_wo_found_encoded_title:"
+		#(( $THINKING_MACHINE )) &&
+		(( $THINKING_MACHINE )) && echo ":" """$encoded_script_wo_found_encoded_title"""
+
+		# Decode findings
+		decoded_title_found=$(echo """$encoded_title_found""" | decode_script_from_saved_spaces)
+		trimmed_title_found=$(echo "$decoded_title_found")
+
+		decoded_contents_found=$(echo """$encoded_contents_found""" | decode_script_from_saved_spaces)
+		trimmed_contents_found=$(echo "$decoded_contents_found")
+
+
+
+	  	if [ ! -z "${trimmed_title_found}" ] ; then  # if not empty
+	  	{
+	  		[[ "${1}" == "-t" ]] && echo -e "\\033[38;5;1mTITLE:\\033[38;5;32m${trimmed_title_found}"
+	  		[[ "${1}" == "-t" ]] && echo -e "\\033[38;5;1mCONTENTS:\\033[38;5;40m${trimmed_contents_found}\\033[0m"
+	  		#debug: echo "${trimmed_contents_found}" | enters_to_semicolon_space
+	  		#debug: echo "${trimmed_contents_found}" | enters_to_and_and
+	  		#debug: echo "${trimmed_contents_found}" | delete_empty_lines | enter_first_only_removed | enter_last_only_removed | tabs_remove | enters_to_semicolon_space
+	  		#debug: echo "${trimmed_contents_found}" | delete_empty_lines | enter_first_only_removed | enter_last_only_removed | tabs_remove | enters_to_and_and
+	  		#debug: LOOPING=0
+	  		commands_to_execute=$(echo "${trimmed_contents_found}" | delete_empty_lines | enter_first_only_removed | enter_last_only_removed | tabs_remove ) #| enters_to_and_and)
+	  		tab_title=$(echo "${trimmed_title_found}")
+	  		(( $THINKING_MACHINE )) && echo "${tab_title}"
+		  	#[[ "${1}" != "-t" ]] && sudo -u ${YOUR_USER_NAME} -H bash << GUAKEPROCESS
+		    #     sudo guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}"
+#GUAKEPROCESS
+			[[ "${1}" != "-t" ]] && sudo guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}"
+			# TODO I have problems with guake install that I have to run it with sudo .... which causes a lot of issues when running everything else
+			#[[ "${1}" != "-t" ]] && su - ${YOUR_USER_NAME} -c """guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}" """
+		}
+	  	fi
+
+	  	# Set content to start over or exit loop
+		encoded_script_wo_found_encoded_contents=$(echo """$encoded_script_wo_found_encoded_title""")
+
+		(( $THINKING_MACHINE )) && echo "New encoded_script...:" """$encoded_script_wo_found_encoded_contents""" | decode_script_from_saved_spaces  | delete_empty_lines
+		(( COUNTER ++ ))
+		(( $COUNTER >= $COUNT_RESULTS )) && break  #-ge
+      }
+      fi
+	}
+    done <<< "${encoded_title_or_titles_found}"
+
+	encoded_script=$(echo """$encoded_script_wo_found_encoded_contents""" )
+	(( $THINKING_MACHINE )) && echo "CHECKING CONTINUE? $encoded_script"
+  	if [ -z "${encoded_script}" ] ; then 	# if  empty
+  	{
+  		LOOPING=0
+	}
+  	fi
+  	(( $THINKING_MACHINE )) &&  echo "Loop lower part"
+}
+done

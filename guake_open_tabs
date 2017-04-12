@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# @author Zeus Intuivo <zeus@intuivo.com>
+#
+
+
+ARGUMENTS=$(sed -e 's/ /\n/g' <<< "$@")   #splitz arugments
+
+while read -r ONE_ARGUMENT; do
+{
+
+  	# if not empty
+  	if [ ! -z "${ONE_ARGUMENT}" ] ; then
+  	{
+	  	# TODO not use SUDO ...but for some reason I need to sudo for this
+	  	# since I keep getting error ➜  guake_intuivo_cli git:(master) guake -r "home"
+	    #                                                              $HOME/.pyenv/versions/2.7.11/bin/python2: No module named guake
+
+	  	sudo guake -n guake -e 'echo Hi' guake -r "${ONE_ARGUMENT}"
+	}
+  	fi
+}
+done <<< "${ARGUMENTS}"
+

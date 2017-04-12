@@ -1,0 +1,6 @@
+#!/bin/bash
+#
+# @author Zeus Intuivo <zeus@intuivo.com>
+#
+cd /_/guake
+sudo ./dev.sh --install &
