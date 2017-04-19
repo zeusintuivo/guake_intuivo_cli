@@ -7,11 +7,14 @@
 #-c does not exit
 #vagrant ssh -t 'sudo service nginx stop && /etc/init.d/pumacontrol.sh start'
 #vagrant ssh -c 'sudo service nginx stop && /etc/init.d/pumacontrol.sh start'
+
+################################### SAMPLE SCRIPT START #####################################################
+
 YOUR_USER_NAME="vagrant"
 PRIVATE_ADMIN_RAILS_DEVELOPER_EMAIL="some_developer@github.com"
-YOUR_VAGRANT_BOX_LOCATION="/_/boxes/branced_weise.box"
-YOUR_PROJECT_LOCATION="/_/weise"
-SERVER_NAME_EXPECTED="puma.weise.box"
+YOUR_VAGRANT_BOX_LOCATION="/_/boxes/ubuntu_development.box"
+YOUR_PROJECT_LOCATION="/_/project_I_have_been_given"
+SERVER_NAME_EXPECTED="puma.ubuntu_development.box"
 script="
 
 box#{
@@ -25,6 +28,7 @@ box#{
 	zsh
 	git status -sb
 	xrandr --current --verbose | grep \" connected\" | cut -d\" \" -f1 | xargs -I {} xrandr --output {}   --brightness .5
+	chromium-browser
 }#
 
 guake_script#{
@@ -210,6 +214,18 @@ clis#{
 	zsh
 }#
 "
+################################### SAMPLE SCRIPT END #####################################################
+
+
+LOAD_SCRIPT=".guake_terminal_to_be_read_script"
+if [ ! -z "${1}" ] ;  then
+    LOAD_SCRIPT="${1}"
+fi
+
+SCRIPT_CONTENTS=""
+[ -f "${LOAD_SCRIPT}" ] && SCRIPT_CONTENTS=$(<"${LOAD_SCRIPT}")
+[[ ! -z "${SCRIPT_CONTENTS}" ]] && eval "${SCRIPT_CONTENTS}"
+
 #echo "$script";
 #exit
 # FIX VISUDO REF: https://stackoverflow.com/questions/21659637/how-to-fix-sudo-no-tty-present-and-no-askpass-program-specified-error
