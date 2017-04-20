@@ -217,15 +217,27 @@ clis#{
 ################################### SAMPLE SCRIPT END #####################################################
 
 
-LOAD_SCRIPT=".guake_terminal_to_be_read_script"
-if [ ! -z "${1}" ] ;  then
+LOAD_SCRIPT="/_/clis/guake_intuivo_cli/.guake_terminal_to_be_read_script"
+if [ ! -z "${1}" ] && [[ "${1}" != "-t" ]] ;  then
     LOAD_SCRIPT="${1}"
 fi
+#echo "${LOAD_SCRIPT}"
 
 SCRIPT_CONTENTS=""
-[ -f "${LOAD_SCRIPT}" ] && SCRIPT_CONTENTS=$(<"${LOAD_SCRIPT}")
-[[ ! -z "${SCRIPT_CONTENTS}" ]] && eval "${SCRIPT_CONTENTS}"
+if [ -f "${LOAD_SCRIPT}" ] ; then
+  SCRIPT_CONTENTS=$(<"${LOAD_SCRIPT}")
+  eval "${SCRIPT_CONTENTS}"
+  #echo "loading script"
+else
+  echo "Error File ${LOAD_SCRIPT} does not exist in this directory: ${PWD}. Cannot execute Process provided. Aborting"
+  exit 130;
+fi
+#echo "${SCRIPT_CONTENTS}"
+#echo $YOUR_USER_NAME
+#[[ ! -z "${SCRIPT_CONTENTS}" ]] &&
+#[[ ! -z "${SCRIPT_CONTENTS}" ]] && eval "${script}"
 
+#echo $YOUR_USER_NAME
 #echo "$script";
 #exit
 # FIX VISUDO REF: https://stackoverflow.com/questions/21659637/how-to-fix-sudo-no-tty-present-and-no-askpass-program-specified-error
