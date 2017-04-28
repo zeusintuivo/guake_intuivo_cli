@@ -672,7 +672,7 @@ encoded_script=$(echo """$script""" | encode_script_to_save_spaces)
 LOOPING=1
 THINKING_MACHINE=0
 DEBUG_MACHINE=0
-[[ "${1}" == "--thinking-machine" ]] && THINKING_MACHINE=1
+[[ "${@}" == *"--thinking-machine"* ]] && THINKING_MACHINE=1
 while (( $LOOPING )); do
 {
 	(( $THINKING_MACHINE )) && echo "********"
