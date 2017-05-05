@@ -221,7 +221,7 @@ LOAD_SCRIPT="/_/clis/guake_intuivo_cli/.guake_terminal_to_be_read_script"
 if [ ! -z "${1}" ] && [[ "${1}" != "-t" ]] ;  then
     LOAD_SCRIPT="${1}"
 fi
-#echo "${LOAD_SCRIPT}"
+echo LOADING SCRIPT: "${LOAD_SCRIPT}"
 
 SCRIPT_CONTENTS=""
 if [ -f "${LOAD_SCRIPT}" ] ; then
@@ -237,7 +237,7 @@ fi
 #[[ ! -z "${SCRIPT_CONTENTS}" ]] &&
 #[[ ! -z "${SCRIPT_CONTENTS}" ]] && eval "${script}"
 
-#echo $YOUR_USER_NAME
+echo TARGET USER NAME: $YOUR_USER_NAME
 #echo "$script";
 #exit
 # FIX VISUDO REF: https://stackoverflow.com/questions/21659637/how-to-fix-sudo-no-tty-present-and-no-askpass-program-specified-error
