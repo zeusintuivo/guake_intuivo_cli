@@ -217,32 +217,9 @@ clis#{
 ################################### SAMPLE SCRIPT END #####################################################
 
 
-LOAD_SCRIPT="/_/clis/guake_intuivo_cli/.guake_terminal_to_be_read_script"
-if [ ! -z "${1}" ] && [[ "${1}" != "-t" ]] ;  then
-    LOAD_SCRIPT="${1}"
-fi
-echo LOADING SCRIPT: "${LOAD_SCRIPT}"
 
-SCRIPT_CONTENTS=""
-if [ -f "${LOAD_SCRIPT}" ] ; then
-  SCRIPT_CONTENTS=$(<"${LOAD_SCRIPT}")
-  eval "${SCRIPT_CONTENTS}"
-  #echo "loading script"
-else
-  echo "Error File ${LOAD_SCRIPT} does not exist in this directory: ${PWD}. Cannot execute Process provided. Aborting"
-  exit 130;
-fi
-#echo "${SCRIPT_CONTENTS}"
-#echo $YOUR_USER_NAME
-#[[ ! -z "${SCRIPT_CONTENTS}" ]] &&
-#[[ ! -z "${SCRIPT_CONTENTS}" ]] && eval "${script}"
 
-echo TARGET USER NAME: $YOUR_USER_NAME
-#echo "$script";
-#exit
-# FIX VISUDO REF: https://stackoverflow.com/questions/21659637/how-to-fix-sudo-no-tty-present-and-no-askpass-program-specified-error
-
-function obtain_with_spaces_between() {
+obtain_with_spaces_between() {
   local PIPED COLORED COUNTER ONEPIPE
   local from1 to2 a filename
   PIPED="";
@@ -668,11 +645,53 @@ test_individual_sed_tests_of_interest() {
 	exit
 }
 
+
+
+
+
+EXECUTING_SCRIPTS=1
+[[ "${@}" == *"--t"* ]] && EXECUTING_SCRIPTS=0
+[[ ! -z "${1}" ]] && [[ "${1}" == "-t"  ]]  && EXECUTING_SCRIPTS=0
+[[ ! -z "${2}" ]] && [[ "${2}" == "-t"  ]]  && EXECUTING_SCRIPTS=0
+
+
+
+LOAD_SCRIPT="/_/clis/guake_intuivo_cli/.guake_terminal_to_be_read_script"
+if [[ ! -z "${1}" ]] ;  then
+    LOAD_SCRIPT="${1}"
+fi
+echo LOADING SCRIPT: "${LOAD_SCRIPT}"
+
+SCRIPT_CONTENTS=""
+if [ -f "${LOAD_SCRIPT}" ] ; then
+  SCRIPT_CONTENTS=$(<"${LOAD_SCRIPT}")
+  eval "${SCRIPT_CONTENTS}"
+  #echo "loading script"
+else
+  echo "Error File ${LOAD_SCRIPT} does not exist in this directory: ${PWD}. Cannot execute Process provided. Aborting"
+  exit 130;
+fi
+#echo "${SCRIPT_CONTENTS}"
+#echo $YOUR_USER_NAME
+#[[ ! -z "${SCRIPT_CONTENTS}" ]] &&
+#[[ ! -z "${SCRIPT_CONTENTS}" ]] && eval "${script}"
+
+echo TARGET USER NAME: $YOUR_USER_NAME
+#echo "$script";
+#exit
+# FIX VISUDO REF: https://stackoverflow.com/questions/21659637/how-to-fix-sudo-no-tty-present-and-no-askpass-program-specified-error
+
+
+
 encoded_script=$(echo """$script""" | encode_script_to_save_spaces)
 LOOPING=1
 THINKING_MACHINE=0
 DEBUG_MACHINE=0
 [[ "${@}" == *"--thinking-machine"* ]] && THINKING_MACHINE=1
+
+(( ! $EXECUTING_SCRIPTS )) && echo -e "\\033[38;5;1mEXECUTING:\\033[38;5;32mWe are testing"
+(( $EXECUTING_SCRIPTS )) && echo -e "\\033[38;5;1mTESTING:\\033[38;5;32mWe are testing. We are NOT executing."
+
 while (( $LOOPING )); do
 {
 	(( $THINKING_MACHINE )) && echo "********"
@@ -747,8 +766,8 @@ while (( $LOOPING )); do
 
 	  	if [ ! -z "${trimmed_title_found}" ] ; then  # if not empty
 	  	{
-	  		[[ "${1}" == "-t" ]] && echo -e "\\033[38;5;1mTITLE:\\033[38;5;32m${trimmed_title_found}"
-	  		[[ "${1}" == "-t" ]] && echo -e "\\033[38;5;1mCONTENTS:\\033[38;5;40m${trimmed_contents_found}\\033[0m"
+	  		(( ! $EXECUTING_SCRIPTS )) && echo -e "\\033[38;5;1mTITLE:\\033[38;5;32m${trimmed_title_found}"
+	  		(( ! $EXECUTING_SCRIPTS )) && echo -e "\\033[38;5;1mCONTENTS:\\033[38;5;40m${trimmed_contents_found}\\033[0m"
 	  		#debug: echo "${trimmed_contents_found}" | enters_to_semicolon_space
 	  		#debug: echo "${trimmed_contents_found}" | enters_to_and_and
 	  		#debug: echo "${trimmed_contents_found}" | delete_empty_lines | enter_first_only_removed | enter_last_only_removed | tabs_remove | enters_to_semicolon_space
@@ -757,12 +776,12 @@ while (( $LOOPING )); do
 	  		commands_to_execute=$(echo "${trimmed_contents_found}" | delete_empty_lines | enter_first_only_removed | enter_last_only_removed | tabs_remove ) #| enters_to_and_and)
 	  		tab_title=$(echo "${trimmed_title_found}")
 	  		(( $THINKING_MACHINE )) && echo "${tab_title}"
-		  	#[[ "${1}" != "-t" ]] && sudo -u ${YOUR_USER_NAME} -H bash << GUAKEPROCESS
+		  	#(( $EXECUTING_SCRIPTS )) && sudo -u ${YOUR_USER_NAME} -H bash << GUAKEPROCESS
 		    #     sudo guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}"
 #GUAKEPROCESS
-			[[ "${1}" != "-t" ]] && sudo guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}"
+			(( $EXECUTING_SCRIPTS )) && sudo guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}"
 			# TODO I have problems with guake install that I have to run it with sudo .... which causes a lot of issues when running everything else
-			#[[ "${1}" != "-t" ]] && su - ${YOUR_USER_NAME} -c """guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}" """
+			#(( $EXECUTING_SCRIPTS )) && su - ${YOUR_USER_NAME} -c """guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}" """
 		}
 	  	fi
 
