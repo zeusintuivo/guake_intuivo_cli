@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #!/bin/bash
 #
 # @author Zeus Intuivo <zeus@intuivo.com>
@@ -9,7 +10,8 @@
 #vagrant ssh -c 'sudo service nginx stop && /etc/init.d/pumacontrol.sh start'
 
 ################################### SAMPLE SCRIPT START #####################################################
-
+THISSCRIPTNAME=`basename "$0"`
+THISSCRIPTLOCATION=`dirname "$0"`
 YOUR_USER_NAME="vagrant"
 PRIVATE_ADMIN_RAILS_DEVELOPER_EMAIL="some_developer@github.com"
 YOUR_VAGRANT_BOX_LOCATION="/_/boxes/ubuntu_development.box"
@@ -480,6 +482,13 @@ tab_decode() {
 	sed 's/T48B/\t/g'
 }
 
+asterisk_encode(){
+    sed 's/[*]/45T3R15K/g'
+}
+asterisk_decode(){
+    sed 's/45T3R15K/\*/g'
+}
+
 backslash_encode() {
 	sed 's/\\/84CK5L45H/g'
 }
@@ -511,6 +520,7 @@ disabled_encoding() {
 }
 encode_script_to_save_spaces() {     # the order of decoding and encoding does matter
 	enter_encode \
+    | asterisk_encode \
 	| more_than_encode \
 	| less_than_encode \
 	| double_quotes_encode \
@@ -541,6 +551,7 @@ disabled_decoding() {
 
 decode_script_from_saved_spaces() {
 	enter_decode \
+    | asterisk_decode \
 	| more_than_decode \
 	| less_than_decode \
 	| double_quotes_decode \
@@ -569,17 +580,42 @@ decode_script_from_saved_spaces() {
 test_assert_get_develop_from_pipe() {
 	#tests assert to get: develop
 	#given the file contain this string "t.m  033[0m from develop.BASEBRAN"
-	echo "t.m  033[0m from develop.BASEBRAN" > /tmp/.demp
-	cat /tmp/.demp | obtain_with_spaces_between "from" ".BASEBRANCH."
-	rm /tmp/.demp
-	exit
+	echo "t.m  033[0m from develop.BASEBRANCH." > /tmp/.demp1234
+	local result=$(cat /tmp/.demp1234 | obtain_with_spaces_between "from" ".BASEBRANCH.")
+    echo "$result"
+	rm /tmp/.demp1234
+    if [[ "$result" != " develop" ]] ; then
+    {
+        echo -e "\\033[38;5;1mFAILED TEST:"
+    }
+    else
+    {
+        echo -e "\\033[38;5;40mPASSED"
+    }
+    fi
+
 }
+## test_assert_get_develop_from_pipe && exit
+
 test_assert_obtain_develop_from_file(){
 	#test assert to see : develop
-	echo "'continue_confirm_start.m  033[0m from develop.BASEBRANCH.' " > .description
-	obtain_with_spaces_between "from" ".BASEBRANCH." .description
-	exit
+	echo "'continue_confirm_start.m  033[0m from develop.BASEBRANCH.' " > .description1234
+	local result=$(obtain_with_spaces_between "from" ".BASEBRANCH." .description1234)
+    echo "$result"
+    rm .description1234
+    if [[ "$result" != " develop" ]] ; then
+    {
+        echo -e "\\033[38;5;1mFAILED TEST:"
+    }
+    else
+    {
+        echo -e "\\033[38;5;40mPASSED"
+    }
+    fi
+
 }
+## test_assert_obtain_develop_from_file && exit
+
 test_encode_decode() {
 	script="
 	puma up#{
@@ -604,15 +640,26 @@ test_encode_decode() {
 	encoded_script=$(echo """$script""" | encode_script_to_save_spaces)
 	echo """$encoded_script"""
 	echo "Decoded:"
-	echo """$encoded_script""" | decode_script_from_saved_spaces
-	exit
+	local result=$(echo """$encoded_script""" | decode_script_from_saved_spaces)
+    echo "$result"
+    if [[ "$script" != "$result" ]] ; then
+    {
+        echo -e "\\033[38;5;1mFAILED TEST:"
+    }
+    else
+    {
+        echo -e "\\033[38;5;40mPASSED"
+    }
+    fi
+
 }
-#test_encode_decode
+## test_encode_decode && exit
+
 test_read_script_find_puma_title() {
 	#test
 	script="
 	puma up#{
-		cd \"/_/boxes/branced_weise.box\"
+		cd \"/_/boxes/puma.weise.box\"
 		#! Shabangs
 		1 + 1 - = 40
 
@@ -632,45 +679,214 @@ test_read_script_find_puma_title() {
 	title_from_cut_encoded_script=$( echo """$cut_enconded_script""" | enter_decode | sed -n -e 's/^\(.*\)\(#{}#\)\(.*\)$/\1/p' )
 	#assert here that the result is TITLE IS: T48Bpuma5P4C3up
 	echo "TITLE IS:" """$title_from_cut_encoded_script"""
-	exit
+    if [[ "$title_from_cut_encoded_script" != "T48Bpuma5P4C3up" ]] ; then
+    {
+        echo -e "\\033[38;5;1mFAILED TEST:"
+    }
+    else
+    {
+        echo -e "\\033[38;5;40mPASSED"
+    }
+    fi
+
 }
-#test_read_script_find_puma_title
+## test_read_script_find_puma_title && exit
 
 test_individual_sed_tests_of_interest() {
 	# this script gets #{}# from puma up#{}#    # REF: https://unix.stackexchange.com/questions/24140/return-only-the-portion-of-a-line-after-a-matching-pattern
-	echo "puma up#{}#" | sed -n -e 's/^.*up//p'
-
+	local result=$(echo "puma up#{asdasd}#" | sed -n -e 's/^.*up//p')
+    echo "$result"
+    if [[ "$result" != "#{asdasd}#" ]] ; then
+    {
+        echo -e "\\033[38;5;1mFAILED TEST:"
+    }
+    else
+    {
+        echo -e "\\033[38;5;40mPASSED\\033[0m"
+    }
+    fi
 	# this script get everything before #{}#
-	echo "puma asd asd asd  asdf asd#{}#" | sed -n -e 's/^\(.*\)\(#{}#\)\(.*\)$/\1/p'
-	exit
+	result=$(echo "puma asd asd asd  asdf asd#{}#" | sed -n -e 's/^\(.*\)\(#{}#\)\(.*\)$/\1/p')
+    echo "$result"
+    if [[ "$result" != "puma asd asd asd  asdf asd" ]] ; then
+    {
+        echo -e "\\033[38;5;1mFAILED TEST:"
+    }
+    else
+    {
+        echo -e "\\033[38;5;40mPASSED\\033[0m"
+    }
+    fi
+
+} # end test_individual_sed_tests_of_interest
+## test_individual_sed_tests_of_interest && exit
+
+test_rails_c_script_bigger_load(){
+    local YOUR_USER_NAME="jesus"
+    local PRIVATE_ADMIN_RAILS_DEVELOPER_EMAIL="jesus.alcaraz@doctena.com"
+    local YOUR_VAGRANT_BOX_LOCATION="/_/boxes/puma.weise.box"
+    local YOUR_PROJECT_LOCATION="/_/weise"
+    local SERVER_NAME_EXPECTED="puma.weise.box"
+    echo "
+
+    rails c#{
+        su ${YOUR_USER_NAME}
+        export COLUMNS=190;
+        TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2;
+        cd ${YOUR_VAGRANT_BOX_LOCATION};
+        vagrant ssh
+        ping localhost -c5
+        cd ${YOUR_PROJECT_LOCATION};
+        rails c && zsh
+
+        # Add my own string helper methods
+
+          # As functions
+
+          def tag_name(text)
+            text.gsub(/\]\[|[^-a-zA-Z0-9:.]/, '_').sub(/_$/, '').underscore
+          end
+
+          def longest_text_length(text)
+            if text.nil? or text.empty?
+              return 0
+            else
+              text.lines.to_a.max_by(&:length).length
+            end
+          end
+
+          def longest_text_lines(text)
+            if text.nil? or text.empty?
+              return 0
+            else
+              text.lines.count
+            end
+          end
+
+          # As extension to String class
+            class String
+              def tag_name
+                self.gsub(/\]\[|[^-a-zA-Z0-9:.]/, '_').sub(/_$/, '').underscore
+              end
+
+              def longest_self_length
+                if self.nil? or self.empty?
+                  return 0
+                else
+                  self.lines.to_a.max_by(&:length).length
+                end
+              end
+
+              def longest_self_lines
+                if self.nil? or self.empty?
+                  return 0
+                else
+                  self.lines.count
+                end
+              end
+            end
+
+        # Rails Register Admin User
+
+            AdminUser.all.each do |x| puts x.email ;  end
+            user = AdminUser.find_by({email:'$PRIVATE_ADMIN_RAILS_DEVELOPER_EMAIL'})
+            user.role='admin'
+            user.save!
+
+        # Rails List all controllers REF: http://stackoverflow.com/questions/1564278/how-to-programmatically-list-all-controllers-in-rails
+
+            controllers = Rails.application.routes.routes.map do |route|
+                route.defaults[:controller] + ',' + route.defaults[:controller].camelize unless route.defaults[:controller] == nil
+            end.uniq
+
+
+            def show_routes
+                controllers = Rails.application.routes.routes.map do |route|
+                  route.defaults[:controller] unless route.defaults[:controller] == nil
+                end.uniq
+            end
+            show_routes
+
+            Dir[Rails.root.join('app/controllers/*_controller.rb')].map { |path| path.match(/(\w+)_controller.rb/); \$1 }.compact.map do |route|
+                route
+            end
+
+        # Rails Show all paths from Routes file REF: http://stackoverflow.com/questions/2846247/rails-check-output-of-path-helper-from-console
+
+            include Rails.application.routes.url_helpers
+
+    }#
+    " #end test_rails_c_script_bigger_script
+} # end test_rails_c_script_bigger_load
+
+test_rails_c_script_bigger_title(){
+    test_rails_c_script_bigger_script=$(test_rails_c_script_bigger_load)
+    local limit=80
+    echo "Original Code:"
+    echo """${test_rails_c_script_bigger_script::limit}"""
+    echo "Encoded:"
+    local encoded_script=$(echo """$test_rails_c_script_bigger_script""" | encode_script_to_save_spaces)
+    echo """${encoded_script::limit}"""
+    echo "Decoded:"
+    echo """${encoded_script::limit}""" | decode_script_from_saved_spaces
+    local striped_contents=$(echo """$encoded_script""" | obtain_with_spaces_between "#{" "}#" )
+    echo """${striped_contents::limit}""" | decode_script_from_saved_spaces
+    local cut_enconded_script=$(echo "$encoded_script"  | sed 's@'"""${striped_contents}"""'@@g')  ;
+    echo """${cut_enconded_script::limit}"""
+    echo """${cut_enconded_script::limit}""" | decode_script_from_saved_spaces
+    local title_from_cut_encoded_script=$( echo """$cut_enconded_script""" | enter_decode | sed -n -e 's/^\(.*\)\(#{}#\)\(.*\)$/\1/p' )
+    #assert here that the result is TITLE IS: T48Bpuma5P4C3up
+    echo "TITLE IS:" """$title_from_cut_encoded_script"""
+    if [[ "$title_from_cut_encoded_script" != "5P4C35P4C35P4C35P4C3rails5P4C3c" ]] ; then
+    {
+        echo -e "\\033[38;5;1mFAILED TEST:"
+        exit
+    }
+    else
+    {
+        echo -e "\\033[38;5;40mPASSED\\033[0m"
+    }
+    fi
+} # end test_rails_c_script_bigger
+## test_rails_c_script_bigger_title && exit
+
+run_tests(){
+    test_assert_get_develop_from_pipe
+    test_assert_obtain_develop_from_file
+    test_encode_decode
+    test_read_script_find_puma_title
+    test_individual_sed_tests_of_interest
+    test_rails_c_script_bigger_title
 }
-
-
-
-
-
-EXECUTING_SCRIPTS=1
-[[ "${@}" == *"--t"* ]] && EXECUTING_SCRIPTS=0
-[[ ! -z "${1}" ]] && [[ "${1}" == "-t"  ]]  && EXECUTING_SCRIPTS=0
-[[ ! -z "${2}" ]] && [[ "${2}" == "-t"  ]]  && EXECUTING_SCRIPTS=0
-
+##
+run_tests && exit
 
 
 LOAD_SCRIPT="/_/clis/guake_intuivo_cli/.guake_terminal_to_be_read_script"
-if [[ ! -z "${1}" ]] ;  then
+if [[ ! -z "${1}" ]] && [[ "${1}" != "-t" ]] && [[ "${1}" != "--thinking-machine" ]] && [[ "${1}" != "--debug-machine" ]] && [[ "${1}" != "-loop-count" ]] ;  then
+{
     LOAD_SCRIPT="${1}"
+}
 fi
-echo LOADING SCRIPT: "${LOAD_SCRIPT}"
 
 SCRIPT_CONTENTS=""
 if [ -f "${LOAD_SCRIPT}" ] ; then
-  SCRIPT_CONTENTS=$(<"${LOAD_SCRIPT}")
-  eval "${SCRIPT_CONTENTS}"
-  #echo "loading script"
+{
+    echo LOADING SCRIPT: "${LOAD_SCRIPT}"
+    SCRIPT_CONTENTS=$(<"${LOAD_SCRIPT}")
+    eval "${SCRIPT_CONTENTS}"
+    #echo "loading script"
+}
 else
+{
   echo "Error File ${LOAD_SCRIPT} does not exist in this directory: ${PWD}. Cannot execute Process provided. Aborting"
   exit 130;
+}
 fi
+
+#script=$(test_rails_c_script_bigger_load)
+#echo "$script"
+
 #echo "${SCRIPT_CONTENTS}"
 #echo $YOUR_USER_NAME
 #[[ ! -z "${SCRIPT_CONTENTS}" ]] &&
@@ -684,22 +900,55 @@ echo TARGET USER NAME: $YOUR_USER_NAME
 
 
 encoded_script=$(echo """$script""" | encode_script_to_save_spaces)
-LOOPING=1
 THINKING_MACHINE=0
 DEBUG_MACHINE=0
+LOOP_COUNT=0
 [[ "${@}" == *"--thinking-machine"* ]] && THINKING_MACHINE=1
+[[ "${@}" == *"--debug-machine"* ]] && DEBUG_MACHINE=1
+[[ "${@}" == *"--loop-count"* ]] && LOOP_COUNT=1
+COUNT=0
+for arg in ${@}; do
+{
+    (( COUNTER++ ))
+    if [[ "${arg}" == *"--loop-count"* ]] ; then
+    {
+        (( COUNTER++ ))
+        local new_count=${${COUNTER}}
+        LOOP_COUNT=1
+        [ -z "${new_count}" ] && LOOP_COUNT=${new_count}
+    }
+    fi
+}
+done
+
+EXECUTING_SCRIPTS=1
+[[ "${@}" == *"--t"* ]] && EXECUTING_SCRIPTS=0
+[[ ! -z "${1}" ]] && [[ "${1}" == "-t"  ]]  && EXECUTING_SCRIPTS=0
+[[ ! -z "${2}" ]] && [[ "${2}" == "-t"  ]]  && EXECUTING_SCRIPTS=0
 
 (( ! $EXECUTING_SCRIPTS )) && echo -e "\\033[38;5;1mEXECUTING:\\033[38;5;32mWe are testing"
 (( $EXECUTING_SCRIPTS )) && echo -e "\\033[38;5;1mTESTING:\\033[38;5;32mWe are testing. We are NOT executing."
+(( $LOOP_COUNT )) && echo -e "\\033[38;5;1mLOOPING:\\033[38;5;32m Loop Count: ${LOOP_COUNT} :"
+(( $THINKING_MACHINE )) && echo -e "\\033[38;5;1mTHINKING_MACHINE:\\033[38;5;32m : ${THINKING_MACHINE} :"
+(( $DEBUG_MACHINE )) && echo -e "\\033[38;5;1mDEBUG_MACHINE:\\033[38;5;32m : ${DEBUG_MACHINE} :"
 
+
+#THINKING_MACHINE=0
+#DEBUG_MACHINE=0
+
+LOOPING=1
+I_GOT_STUCK_COUNTER=0
 while (( $LOOPING )); do
 {
+    (( $THINKING_MACHINE )) &&  echo -e "\\033[38;5;40mTHINKING-MACHINE\\033[38;5;1m-Loop UPPER part"
 	(( $THINKING_MACHINE )) && echo "********"
 	(( $THINKING_MACHINE )) && echo "********"
-	(( $THINKING_MACHINE )) && echo "READING:${encoded_script}"
-    (( $THINKING_MACHINE )) && echo """$encoded_script""" | decode_script_from_saved_spaces                                                       # find the first occurrence
+	(( $THINKING_MACHINE )) && echo -e "\\033[38;5;1mREADING:\033[0m"
+    (( $THINKING_MACHINE )) && echo "${encoded_script}"
+    (( $THINKING_MACHINE )) && echo """$encoded_script""" | decode_script_from_saved_spaces                                              # find the first occurrence
 	(( $THINKING_MACHINE )) && echo "********"
 	(( $THINKING_MACHINE )) && echo "********"
+
 	encoded_contents_found=$(echo """$encoded_script""" | obtain_with_spaces_between "#{" "}#" )
 
 	(( $THINKING_MACHINE )) && echo "encoded_contents_found:"
@@ -762,12 +1011,14 @@ while (( $LOOPING )); do
 		decoded_contents_found=$(echo """$encoded_contents_found""" | decode_script_from_saved_spaces)
 		trimmed_contents_found=$(echo "$decoded_contents_found")
 
-
+        #[ ! -z "${trimmed_title_found}" ]  && [[ "${trimmed_title_found}" == "/" ]] && THINKING_MACHINE=1 && DEBUG_MACHINE=1
 
 	  	if [ ! -z "${trimmed_title_found}" ] ; then  # if not empty
 	  	{
 	  		(( ! $EXECUTING_SCRIPTS )) && echo -e "\\033[38;5;1mTITLE:\\033[38;5;32m${trimmed_title_found}"
-	  		(( ! $EXECUTING_SCRIPTS )) && echo -e "\\033[38;5;1mCONTENTS:\\033[38;5;40m${trimmed_contents_found}\\033[0m"
+	  		(( ! $EXECUTING_SCRIPTS )) && echo -e "\\033[38;5;1mCONTENTS:\\033[38;5;40m"
+            (( ! $EXECUTING_SCRIPTS )) && echo "${trimmed_contents_found}"
+            (( ! $EXECUTING_SCRIPTS )) && echo -e "\\033[0m"
 	  		#debug: echo "${trimmed_contents_found}" | enters_to_semicolon_space
 	  		#debug: echo "${trimmed_contents_found}" | enters_to_and_and
 	  		#debug: echo "${trimmed_contents_found}" | delete_empty_lines | enter_first_only_removed | enter_last_only_removed | tabs_remove | enters_to_semicolon_space
@@ -775,7 +1026,7 @@ while (( $LOOPING )); do
 	  		#debug: LOOPING=0
 	  		commands_to_execute=$(echo "${trimmed_contents_found}" | delete_empty_lines | enter_first_only_removed | enter_last_only_removed | tabs_remove ) #| enters_to_and_and)
 	  		tab_title=$(echo "${trimmed_title_found}")
-	  		(( $THINKING_MACHINE )) && echo "${tab_title}"
+	  		(( $THINKING_MACHINE )) && echo "THINKING-MACHINE-TAB-TITLE: ${tab_title}"
 		  	#(( $EXECUTING_SCRIPTS )) && sudo -u ${YOUR_USER_NAME} -H bash << GUAKEPROCESS
 		    #     sudo guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}"
 #GUAKEPROCESS
@@ -788,21 +1039,40 @@ while (( $LOOPING )); do
 	  	# Set content to start over or exit loop
 		encoded_script_wo_found_encoded_contents=$(echo """$encoded_script_wo_found_encoded_title""")
 
-		(( $THINKING_MACHINE )) && echo "New encoded_script...:" """$encoded_script_wo_found_encoded_contents""" | decode_script_from_saved_spaces  | delete_empty_lines
+		(( $THINKING_MACHINE )) && echo "THINKING-MACHINE-New encoded_script...:" """$encoded_script_wo_found_encoded_contents""" | decode_script_from_saved_spaces  | delete_empty_lines
 		(( COUNTER ++ ))
-		(( $COUNTER >= $COUNT_RESULTS )) && break  #-ge
+		(( $COUNTER >= $COUNT_RESULTS )) && break  # -ge == >=
       }
       fi
 	}
     done <<< "${encoded_title_or_titles_found}"
 
 	encoded_script=$(echo """$encoded_script_wo_found_encoded_contents""" )
-	(( $THINKING_MACHINE )) && echo "CHECKING CONTINUE? $encoded_script"
+	(( $THINKING_MACHINE )) && echo "THINKING-MACHINE-CHECKING CONTINUE? Encoded script left to process: $encoded_script"
   	if [ -z "${encoded_script}" ] ; then 	# if  empty
   	{
-  		LOOPING=0
+  		LOOPING=0 # this ends the while loop, exits, breaks out,
 	}
   	fi
-  	(( $THINKING_MACHINE )) &&  echo "Loop lower part"
+    (( $THINKING_MACHINE )) &&  echo -e "\\033[38;5;40mTHINKING-MACHINE\\033[38;5;1m-Loop lower part"
+    if (( $LOOP_COUNT )) ; then
+    {
+        (( $LOOP_COUNT == 1 )) && LOOPING=0 # this ends the while loop, exits, breaks out,
+        (( $LOOP_COUNT > 1 )) && (( LOOP_COUNT -- ))
+    }
+    fi
+
+    (( I_GOT_STUCK_COUNTER ++ ))
+        echo "I GOT STUCK COUNTER IS : $I_GOT_STUCK_COUNTER :"
+    if (( $I_GOT_STUCK_COUNTER >= 15 )) ; then
+    {
+        echo -e "\\033[38;5;1mI GOT STUCK!!!"
+        echo -e "\\033[38;5;214mThere something wrong with the script: ${LOAD_SCRIPT}"
+        echo -e "\\033[38;5;40m"
+        echo -e "\\033[38;5;1mDEBUG LIKE: ${THISSCRIPTLOCATION}/${THISSCRIPTNAME} ${LOAD_SCRIPT} -t --thinking-machine --debug-machine --loop-count"
+        LOOPING=0 # this ends the while loop, exits, breaks out,
+    }
+    fi
+
 }
 done
