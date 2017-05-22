@@ -892,7 +892,7 @@ fi
 #[[ ! -z "${SCRIPT_CONTENTS}" ]] &&
 #[[ ! -z "${SCRIPT_CONTENTS}" ]] && eval "${script}"
 
-echo TARGET USER NAME: $YOUR_USER_NAME
+echo "TARGET USER NAME: $YOUR_USER_NAME"
 #echo "$script";
 #exit
 # FIX VISUDO REF: https://stackoverflow.com/questions/21659637/how-to-fix-sudo-no-tty-present-and-no-askpass-program-specified-error
@@ -1063,9 +1063,9 @@ while (( $LOOPING )); do
     fi
 
     (( I_GOT_STUCK_COUNTER ++ ))
-        echo "I GOT STUCK COUNTER IS : $I_GOT_STUCK_COUNTER :"
     if (( $I_GOT_STUCK_COUNTER >= 15 )) ; then
     {
+        echo "I GOT STUCK COUNTER IS : $I_GOT_STUCK_COUNTER :"
         echo -e "\\033[38;5;1mI GOT STUCK!!!"
         echo -e "\\033[38;5;214mThere something wrong with the script: ${LOAD_SCRIPT}"
         echo -e "\\033[38;5;40m"
