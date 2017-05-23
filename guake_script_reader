@@ -530,11 +530,15 @@ delete_empty_lines() {
 
 disabled_encoding() {
   echo "encoding" \
+  | curly_braket_open_encode \
+  | curly_braket_close_encode \
   | echo "$0"
 }
 encode_script_to_save_spaces() {     # the order of decoding and encoding does matter
   enter_encode \
   | asterisk_encode \
+  | parentheses_open_encode \
+  | parentheses_close_encode \
   | more_than_encode \
   | less_than_encode \
   | double_quotes_encode \
@@ -551,10 +555,6 @@ encode_script_to_save_spaces() {     # the order of decoding and encoding does m
   | money_encode \
   | squared_braket_open_encode \
   | squared_braket_close_encode \
-  | curly_braket_open_encode \
-  | curly_braket_close_encode \
-  | parentheses_open_encode \
-  | parentheses_close_encode \
   | ampersand_encode \
   | arroba_encode \
   | tab_encode \
@@ -564,12 +564,17 @@ encode_script_to_save_spaces() {     # the order of decoding and encoding does m
 }
 disabled_decoding() {
   echo "decoding" \
+  | curly_braket_open_decode \
+  | curly_braket_close_decode \
   | echo "$0"
 }
+
 
 decode_script_from_saved_spaces() {
   enter_decode \
   | asterisk_decode \
+  | parentheses_open_decode \
+  | parentheses_close_decode \
   | more_than_decode \
   | less_than_decode \
   | double_quotes_decode \
@@ -587,10 +592,6 @@ decode_script_from_saved_spaces() {
   | money_decode \
   | squared_braket_open_decode \
   | squared_braket_close_decode \
-  | curly_braket_open_decode \
-  | curly_braket_close_decode \
-  | parentheses_open_decode \
-  | parentheses_close_decode \
   | ampersand_decode \
   | arroba_decode \
   | tab_decode \
@@ -608,11 +609,11 @@ test_assert_get_develop_from_pipe() {
   rm /tmp/.demp1234
     if [[ "$result" != " develop" ]] ; then
     {
-        echo -e "\\033[38;5;1mFAILED TEST:"
+        echo -e "\\033[38;5;1mFAILED TEST: ${FUNCNAME[0]}"
     }
     else
     {
-        echo -e "\\033[38;5;40mPASSED"
+        echo -e "\\033[38;5;40mPASSED:  ${FUNCNAME[0]} :"
     }
     fi
 
@@ -627,11 +628,11 @@ test_assert_obtain_develop_from_file(){
     rm .description1234
     if [[ "$result" != " develop" ]] ; then
     {
-        echo -e "\\033[38;5;1mFAILED TEST:"
+        echo -e "\\033[38;5;1mFAILED TEST: ${FUNCNAME[0]}"
     }
     else
     {
-        echo -e "\\033[38;5;40mPASSED"
+        echo -e "\\033[38;5;40mPASSED:  ${FUNCNAME[0]} :"
     }
     fi
 
@@ -666,11 +667,11 @@ test_encode_decode() {
     echo "$result"
     if [[ "$script" != "$result" ]] ; then
     {
-        echo -e "\\033[38;5;1mFAILED TEST:"
+        echo -e "\\033[38;5;1mFAILED TEST: ${FUNCNAME[0]}"
     }
     else
     {
-        echo -e "\\033[38;5;40mPASSED"
+        echo -e "\\033[38;5;40mPASSED:  ${FUNCNAME[0]} :"
     }
     fi
 
@@ -701,13 +702,13 @@ test_read_script_find_puma_title() {
   title_from_cut_encoded_script=$( echo """$cut_enconded_script""" | enter_decode | sed -n -e 's/^\(.*\)\(#{}#\)\(.*\)$/\1/p' )
   #assert here that the result is TITLE IS: T48Bpuma5P4C3up
   echo "TITLE IS:" """$title_from_cut_encoded_script"""
-    if [[ "$title_from_cut_encoded_script" != "T48Bpuma5P4C3up" ]] ; then
+    if [[ "$title_from_cut_encoded_script" != "5P4C35P4C3puma5P4C3up" ]] ; then
     {
-        echo -e "\\033[38;5;1mFAILED TEST:"
+        echo -e "\\033[38;5;1mFAILED TEST: ${FUNCNAME[0]}"
     }
     else
     {
-        echo -e "\\033[38;5;40mPASSED"
+        echo -e "\\033[38;5;40mPASSED:  ${FUNCNAME[0]} :"
     }
     fi
 
@@ -720,11 +721,11 @@ test_individual_sed_tests_of_interest() {
     echo "$result"
     if [[ "$result" != "#{asdasd}#" ]] ; then
     {
-        echo -e "\\033[38;5;1mFAILED TEST:"
+        echo -e "\\033[38;5;1mFAILED TEST: ${FUNCNAME[0]}"
     }
     else
     {
-        echo -e "\\033[38;5;40mPASSED\\033[0m"
+        echo -e "\\033[38;5;40mPASSED:  ${FUNCNAME[0]} :\\033[0m"
     }
     fi
   # this script get everything before #{}#
@@ -732,11 +733,11 @@ test_individual_sed_tests_of_interest() {
     echo "$result"
     if [[ "$result" != "puma asd asd asd  asdf asd" ]] ; then
     {
-        echo -e "\\033[38;5;1mFAILED TEST:"
+        echo -e "\\033[38;5;1mFAILED TEST: ${FUNCNAME[0]}"
     }
     else
     {
-        echo -e "\\033[38;5;40mPASSED\\033[0m"
+        echo -e "\\033[38;5;40mPASSED:  ${FUNCNAME[0]} :\\033[0m"
     }
     fi
 
@@ -861,27 +862,57 @@ test_rails_c_script_bigger_title(){
     echo "TITLE IS:" """$title_from_cut_encoded_script"""
     if [[ "$title_from_cut_encoded_script" != "5P4C35P4C35P4C35P4C3rails5P4C3c" ]] ; then
     {
-        echo -e "\\033[38;5;1mFAILED TEST:"
+        echo -e "\\033[38;5;1mFAILED TEST: ${FUNCNAME[0]}"
         exit
     }
     else
     {
-        echo -e "\\033[38;5;40mPASSED\\033[0m"
+        echo -e "\\033[38;5;40mPASSED:  ${FUNCNAME[0]} :\\033[0m"
     }
     fi
 } # end test_rails_c_script_bigger
 ## test_rails_c_script_bigger_title && exit
 
-run_tests(){
+self_integrity_check(){
+    local test_list="
     test_assert_get_develop_from_pipe
     test_assert_obtain_develop_from_file
     test_encode_decode
     test_read_script_find_puma_title
     test_individual_sed_tests_of_interest
-    test_rails_c_script_bigger_title
-}
+    test_rails_c_script_bigger_title"
+    local results=""
+    local result=""
+    for test in $test_list; do
+    {
+        if [ ! -z "${test}" ] ; then
+        {
+            result=$("${test}" | tail -1 )
+            if [ -z "${results}" ] ; then
+            {
+                results="${result}"
+            }
+            else
+            {
+                results="${results}\n${result}"
+            }
+            fi
+        }
+        fi
+    }
+    done
+    if [[ "${results}" == *"FAILED"* ]] ; then
+    {
+        echo -e " ${CYAN} Self integrity test failed"
+        echo -e "${results}"
+        echo -e " ${RED} Not able to encode- decode properly ${RESET}"
+        exit 130;
+    }
+    fi
+
+} # end self_integrity_check
 ##
-run_tests && exit
+self_integrity_check #  && exit
 
 
 LOAD_SCRIPT="/_/clis/guake_intuivo_cli/.guake_terminal_to_be_read_script"
