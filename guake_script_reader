@@ -979,8 +979,8 @@ EXECUTING_SCRIPTS=1
 [[ ! -z "${1}" ]] && [[ "${1}" == "-t"  ]]  && EXECUTING_SCRIPTS=0
 [[ ! -z "${2}" ]] && [[ "${2}" == "-t"  ]]  && EXECUTING_SCRIPTS=0
 
-(( ! $EXECUTING_SCRIPTS )) && echo -e "\\033[38;5;1mEXECUTING:\\033[38;5;32mWe are testing"
-(( $EXECUTING_SCRIPTS )) && echo -e "\\033[38;5;1mTESTING:\\033[38;5;32mWe are testing. We are NOT executing."
+(( $EXECUTING_SCRIPTS )) && echo -e "\\033[38;5;40mEXECUTING\\033[38;5;1m:${CYAN}We are \\033[38;5;1mexecuting${CYAN}."
+(( ! $EXECUTING_SCRIPTS )) && echo -e "\\033[38;5;1mTESTING:\\033[38;5;32mWe are testing. We are NOT executing."
 (( $LOOP_COUNT )) && echo -e "\\033[38;5;1mLOOPING:\\033[38;5;32m Loop Count: ${LOOP_COUNT} :"
 (( $THINKING_MACHINE )) && echo -e "\\033[38;5;1mTHINKING_MACHINE:\\033[38;5;32m : ${THINKING_MACHINE} :"
 (( $DEBUG_MACHINE )) && echo -e "\\033[38;5;1mDEBUG_MACHINE:\\033[38;5;32m : ${DEBUG_MACHINE} :"
