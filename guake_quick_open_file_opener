@@ -3,5 +3,5 @@
 #
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
-subl ${@}
+#subl ${@}
 [ -d .idea/ ] && mine ${@}
