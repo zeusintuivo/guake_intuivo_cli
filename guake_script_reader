@@ -17,6 +17,19 @@ PRIVATE_ADMIN_RAILS_DEVELOPER_EMAIL="some_developer@github.com"
 YOUR_VAGRANT_BOX_LOCATION="/_/boxes/ubuntu_development.box"
 YOUR_PROJECT_LOCATION="/_/project_I_have_been_given"
 SERVER_NAME_EXPECTED="puma.ubuntu_development.box"
+
+#colors
+[[ -z "${CYAN}" ]] && CYAN="\\033[38;5;123m"
+[[ -z "${PURPLE}" ]] && PURPLE="\\033[01;35m"
+[[ -z "${PURPLE_BLUE}" ]] && PURPLE_BLUE="\\033[38;5;93m"
+[[ -z "${GRAY241}" ]] && GRAY241="\\033[38;5;241m"
+[[ -z "${YELLOW226}" ]] && YELLOW226="\\033[38;5;226m"
+[[ -z "${YELLOW}" ]] && YELLOW="\\033[01;33m"
+[[ -z "${RESET}" ]] && RESET="\\033[0m"
+[[ -z "${RED}" ]] && RED="\\033[38;5;1m"
+[[ -z "${BRIGHT_BLUE87}" ]] && BRIGHT_BLUE87="\\033[38;5;87m"
+
+
 script="
 
 box®{
@@ -918,6 +931,19 @@ self_integrity_check #  && exit
 LOAD_SCRIPT="/_/clis/guake_intuivo_cli/.guake_terminal_to_be_read_script"
 if [[ ! -z "${1}" ]] && [[ "${1}" != "-t" ]] && [[ "${1}" != "--thinking-machine" ]] && [[ "${1}" != "--debug-machine" ]] && [[ "${1}" != "-loop-count" ]] ;  then
 {
+    # test script for errors
+    ERROR_TEST=$(bash "${1}" 2>&1 )  # Check and catch capture all stout sdout output, error will return 1 to $?)
+    if [[ ! -z "${ERROR_TEST}" ]] ; then
+    {
+      echo -e "${RED}"
+      echo -e "Error File ${BRIGHT_BLUE87} ${LOAD_SCRIPT} . ${YELLOW226} It contains errors. Aborting: "
+      echo -e "${PURPLE}error: "
+      echo -e "${YELLOW} "
+      echo -e "${ERROR_TEST}"
+      echo -e "${RESET}"
+      exit 130;
+    }
+    fi
     LOAD_SCRIPT="${1}"
 }
 fi

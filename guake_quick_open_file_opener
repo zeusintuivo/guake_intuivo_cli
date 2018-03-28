@@ -5,4 +5,4 @@
 #
 # Suggesged to Place under Quick Open  PATTERN: /usr/local/bin/guake_quick_open_file_opener %(file_path)s:%(line_number)s
 subl ${@}
-[ -d .idea/ ] && mine ${@}
+[ -d .idea/ ] && webstorm ${@}
