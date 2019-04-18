@@ -4,9 +4,18 @@
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
 # Suggesged to Place under Quick Open  PATTERN: /usr/local/bin/guake_quick_open_file_opener %(file_path)s:%(line_number)s
-if [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] || [ -d ../../../.idea/ ] || [ -d ../../../../.idea/ ] ; then
+
+echo "You cliked: ${@}"
+if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] || [ -d ../../../.idea/ ] || [ -d ../../../../.idea/ ] ; then
 {
     webstorm ${@}
+    if [ -f ./Gemfile.lock ] || [ -f Gemfile.lock ] || [ -f ../Gemfile.lock ] || [ -f ../../Gemfile.lock ] || [ -f ../../../Gemfile.lock ] || [ -f ../../../../Gemfile.lock ] ; then
+    {
+        mine ${@}
+    } else {
+
+    }
+    fi
 } 
 else 
 {
