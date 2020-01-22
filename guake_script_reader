@@ -52,9 +52,9 @@ guake_script®{
   branches -l
   free -g
   su ${YOUR_USER_NAME}
-  cd /Users/benutzer$HOME/_/clis/guake_intuivo_cli
+  cd $HOME/_/clis/guake_intuivo_cli
   zsh
-  /Users/benutzer$HOME/_/clis/guake_intuivo_cli/guake_script_reader -t
+  $HOME/_/clis/guake_intuivo_cli/guake_script_reader -t
 }®
 
 
@@ -219,12 +219,12 @@ weise®{
 clis®{
   #sudo -u ${YOUR_USER_NAME} -H zsh << EOF
 #EOF
-  #su - ${YOUR_USER_NAME} -c \"export COLUMNS=190; TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2; cd /Users/benutzer$HOME/_/clis; subdir_git_status; zsh\"
+  #su - ${YOUR_USER_NAME} -c \"export COLUMNS=190; TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2; cd $HOME/_/clis; subdir_git_status; zsh\"
 
   su ${YOUR_USER_NAME}
   export COLUMNS=190
   TERM=\"$TERM\"; echo TERM is \"\$TERM\" >&2
-  cd /Users/benutzer$HOME/_/clis
+  cd $HOME/_/clis
   subdir_git_status
   zsh
 }®
@@ -928,7 +928,7 @@ self_integrity_check(){
 self_integrity_check #  && exit
 
 
-LOAD_SCRIPT="/Users/benutzer$HOME/_/clis/guake_intuivo_cli/.guake_terminal_to_be_read_script"
+LOAD_SCRIPT="$HOME/_/clis/guake_intuivo_cli/.guake_terminal_to_be_read_script"
 if [[ ! -z "${1}" ]] && [[ "${1}" != "-t" ]] && [[ "${1}" != "--thinking-machine" ]] && [[ "${1}" != "--debug-machine" ]] && [[ "${1}" != "-loop-count" ]] ;  then
 {
     # test script for errors
