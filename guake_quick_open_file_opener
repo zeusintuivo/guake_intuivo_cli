@@ -8,12 +8,14 @@
 echo "You cliked: ${@}"
 if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] || [ -d ../../../.idea/ ] || [ -d ../../../../.idea/ ] ; then
 {
-    webstorm ${@}
+     mine ${@}
     if [ -f ./Gemfile.lock ] || [ -f Gemfile.lock ] || [ -f ../Gemfile.lock ] || [ -f ../../Gemfile.lock ] || [ -f ../../../Gemfile.lock ] || [ -f ../../../../Gemfile.lock ] ; then
     {
         mine ${@}
     } else {
-
+        echo "Could not identify how to start"
+        webstorm ${@}
+        code ${@}
     }
     fi
 } 
