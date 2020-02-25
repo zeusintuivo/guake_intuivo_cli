@@ -6,13 +6,13 @@
 # Suggesged to Place under Quick Open  PATTERN: /usr/local/bin/guake_quick_open_file_opener %(file_path)s:%(line_number)s
 
 echo "You cliked: ${@}"
-if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] || [ -d ../../../.idea/ ] || [ -d ../../../../.idea/ ] ; then
+if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] || [ -d ../../../.idea/ ] || [ -d ../../../../.idea/ ] || [ -d ../../../../../.idea/ ] || [ -d ../../../../../../.idea/ ]; then
 {
-    if [ -f ./Gemfile.lock ] || [ -f Gemfile.lock ] || [ -f ../Gemfile.lock ] || [ -f ../../Gemfile.lock ] || [ -f ../../../Gemfile.lock ] || [ -f ../../../../Gemfile.lock ] ; then
+    if [ -f ./Gemfile.lock ] || [ -f Gemfile.lock ] || [ -f ../Gemfile.lock ] || [ -f ../../Gemfile.lock ] || [ -f ../../../Gemfile.lock ] || [ -f ../../../../Gemfile.lock ]  || [ -f ../../../../../Gemfile.lock ] || [ -f ../../../../../../Gemfile.lock ]  ; then
     {
         mine ${@}
     }
-    elif [ -f ./composer.lock ] || [ -f composer.lock ] || [ -f ../composer.lock ] || [ -f ../../composer.lock ] || [ -f ../../../composer.lock ] || [ -f ../../../../composer.lock ] ; then
+    elif [ -f ./composer.lock ] || [ -f composer.lock ] || [ -f ../composer.lock ] || [ -f ../../composer.lock ] || [ -f ../../../composer.lock ] || [ -f ../../../../composer.lock ] || [ -f ../../../../../composer.lock ] || [ -f ../../../../../../composer.lock ] ; then
     {
         pstorm ${@}
     }
