@@ -8,11 +8,18 @@
 echo "You cliked: ${@}"
 if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] || [ -d ../../../.idea/ ] || [ -d ../../../../.idea/ ] || [ -d ../../../../../.idea/ ] || [ -d ../../../../../../.idea/ ]; then
 {
+    # rails
     if [ -f ./Gemfile.lock ] || [ -f Gemfile.lock ] || [ -f ../Gemfile.lock ] || [ -f ../../Gemfile.lock ] || [ -f ../../../Gemfile.lock ] || [ -f ../../../../Gemfile.lock ]  || [ -f ../../../../../Gemfile.lock ] || [ -f ../../../../../../Gemfile.lock ]  ; then
     {
         mine ${@}
     }
-    elif [ -f ./composer.lock ] || [ -f composer.lock ] || [ -f ../composer.lock ] || [ -f ../../composer.lock ] || [ -f ../../../composer.lock ] || [ -f ../../../../composer.lock ] || [ -f ../../../../../composer.lock ] || [ -f ../../../../../../composer.lock ] ; then
+    elif
+    (   # laravel
+        [ -f ./composer.lock ] || [ -f composer.lock ] || [ -f ../composer.lock ] || [ -f ../../composer.lock ] || [ -f ../../../composer.lock ] || [ -f ../../../../composer.lock ] || [ -f ../../../../../composer.lock ] || [ -f ../../../../../../composer.lock ]
+    ) ||
+    (   # wordpress
+        [ -f ./wp-config.php ] || [ -f wp-config.php ] || [ -f ../wp-config.php ] || [ -f ../../wp-config.php ] || [ -f ../../../wp-config.php ] || [ -f ../../../../wp-config.php ] || [ -f ../../../../../wp-config.php ] || [ -f ../../../../../../wp-config.php ]
+    )  ; then
     {
         pstorm ${@}
     }
