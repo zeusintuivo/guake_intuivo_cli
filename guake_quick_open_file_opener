@@ -6,10 +6,29 @@
 # Suggesged to Place under Quick Open  PATTERN: /usr/local/bin/guake_quick_open_file_opener %(file_path)s:%(line_number)s
 
 echo "You cliked: ${@}"
+function file_extension() {
+    #
+    # Outputs the file extension given a file name
+    #
+    # $1 - Filename
+    #
+    # Usage: extension=$(file_extension "foo/bar.baz")
+    #   Result: $extension ==> "baz"
+    #
+    #
+    echo "${1##*.}"
+}
+clicked_extension=$(file_extension "${@}")
+
 if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] || [ -d ../../../.idea/ ] || [ -d ../../../../.idea/ ] || [ -d ../../../../../.idea/ ] || [ -d ../../../../../../.idea/ ]; then
 {
     # rails
-    if [ -f ./Gemfile.lock ] || [ -f Gemfile.lock ] || [ -f ../Gemfile.lock ] || [ -f ../../Gemfile.lock ] || [ -f ../../../Gemfile.lock ] || [ -f ../../../../Gemfile.lock ]  || [ -f ../../../../../Gemfile.lock ] || [ -f ../../../../../../Gemfile.lock ]  ; then
+    if (
+        [ -f ./Gemfile.lock ] || [ -f Gemfile.lock ] || [ -f ../Gemfile.lock ] || [ -f ../../Gemfile.lock ] || [ -f ../../../Gemfile.lock ] || [ -f ../../../../Gemfile.lock ]  || [ -f ../../../../../Gemfile.lock ] || [ -f ../../../../../../Gemfile.lock ]
+       ) ||
+       (
+        [[ clicked_extension=="rb" ]]
+       )  ; then
     {
         mine ${@}
     }
@@ -19,7 +38,10 @@ if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] |
     ) ||
     (   # wordpress
         [ -f ./wp-config.php ] || [ -f wp-config.php ] || [ -f ../wp-config.php ] || [ -f ../../wp-config.php ] || [ -f ../../../wp-config.php ] || [ -f ../../../../wp-config.php ] || [ -f ../../../../../wp-config.php ] || [ -f ../../../../../../wp-config.php ]
-    )  ; then
+    ) ||
+    (
+        [[ clicked_extension=="php" ]]
+    ) ; then
     {
         pstorm ${@}
     }
