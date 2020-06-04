@@ -16,44 +16,60 @@ function file_extension() {
     #   Result: $extension ==> "baz"
     #
     #
-    echo "${1##*.}"
-}
-clicked_extension=$(file_extension "${@}")
-
-if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] || [ -d ../../../.idea/ ] || [ -d ../../../../.idea/ ] || [ -d ../../../../../.idea/ ] || [ -d ../../../../../../.idea/ ]; then
-{
-    # rails
-    if (
-        [ -f ./Gemfile.lock ] || [ -f Gemfile.lock ] || [ -f ../Gemfile.lock ] || [ -f ../../Gemfile.lock ] || [ -f ../../../Gemfile.lock ] || [ -f ../../../../Gemfile.lock ]  || [ -f ../../../../../Gemfile.lock ] || [ -f ../../../../../../Gemfile.lock ]
-       ) ||
-       (
-        [[ clicked_extension=="rb" ]]
-       )  ; then
+    local test_value=$(echo "${1##*.}")
+    if [[ "${test_value}" == *":"* ]] ; then
     {
-        mine ${@}
-    }
-    elif
-    (   # laravel
-        [ -f ./composer.lock ] || [ -f composer.lock ] || [ -f ../composer.lock ] || [ -f ../../composer.lock ] || [ -f ../../../composer.lock ] || [ -f ../../../../composer.lock ] || [ -f ../../../../../composer.lock ] || [ -f ../../../../../../composer.lock ]
-    ) ||
-    (   # wordpress
-        [ -f ./wp-config.php ] || [ -f wp-config.php ] || [ -f ../wp-config.php ] || [ -f ../../wp-config.php ] || [ -f ../../../wp-config.php ] || [ -f ../../../../wp-config.php ] || [ -f ../../../../../wp-config.php ] || [ -f ../../../../../../wp-config.php ]
-    ) ||
-    (
-        [[ clicked_extension=="php" ]]
-    ) ; then
-    {
-        pstorm ${@}
-    }
-    else
-    {
-        webstorm ${@}
+        echo "${test_value}" | cut -d":" -f1
+    } else {
+        echo "${test_value}"
     }
     fi
-}
-else
-{
-    code ${@}
-}
-fi
+} # noitcunf file_extension
 
+clicked_extension=$(file_extension "${@}")
+echo $clicked_extension
+if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] || [ -d ../../../.idea/ ] || [ -d ../../../../.idea/ ] || [ -d ../../../../../.idea/ ] || [ -d ../../../../../../.idea/ ]; then
+    {
+        # rails
+        if (
+            [ -f ./Gemfile.lock ] || [ -f Gemfile.lock ] || [ -f ../Gemfile.lock ] || [ -f ../../Gemfile.lock ] || [ -f ../../../Gemfile.lock ] || [ -f ../../../../Gemfile.lock ] || [ -f ../../../../../Gemfile.lock ] || [ -f ../../../../../../Gemfile.lock ]
+        ) ||
+            (
+                [[ "${clicked_extension}" == "rb" ]]
+            ); then
+            {
+                mine ${@}
+            }
+        elif
+            (# laravel
+                [ -f ./composer.lock ] || [ -f composer.lock ] || [ -f ../composer.lock ] || [ -f ../../composer.lock ] || [ -f ../../../composer.lock ] || [ -f ../../../../composer.lock ] || [ -f ../../../../../composer.lock ] || [ -f ../../../../../../composer.lock ]
+            ) ||
+            (# wordpress
+                [ -f ./wp-config.php ] || [ -f wp-config.php ] || [ -f ../wp-config.php ] || [ -f ../../wp-config.php ] || [ -f ../../../wp-config.php ] || [ -f ../../../../wp-config.php ] || [ -f ../../../../../wp-config.php ] || [ -f ../../../../../../wp-config.php ]
+            ) ||
+            (# valet
+                # bin  cli  composer.json  develop  LICENSE.txt  readme.md  SECURITY.md  server.php  valet
+                # bin  cli  composer.json  composer.lock  develop  LICENSE.txt  readme.md  SECURITY.md  server.php  valet  vendor
+                [ -d ./bin ] || [ -d ./cli ] || [ -f ./composer.json ] || [ -f ./develop ] || [ -f ./LICENSE.txt ] || [ -f ./readme.md ] || [ -f ./SECURITY.md ] || [ -f ./server.php ] || [ -f ./valet ]
+            ) ||
+            (# just composer project
+                [ -f ./composer.json ] || [ -f ./composer.lock ] || [ -d ./vendor ]
+            ) ||
+            (
+                [[ "${clicked_extension}" == "php" ]]
+            )
+        then
+            {
+                pstorm ${@}
+            }
+        else
+            {
+                webstorm ${@}
+            }
+        fi
+    }
+else
+    {
+        code -g ${@}
+    }
+fi
