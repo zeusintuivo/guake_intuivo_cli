@@ -28,6 +28,7 @@ function file_extension() {
 
 clicked_extension=$(file_extension "${@}")
 echo $clicked_extension
+# If inside a JetBrains Folder is located, Assumption that you have installed it
 if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] || [ -d ../../../.idea/ ] || [ -d ../../../../.idea/ ] || [ -d ../../../../../.idea/ ] || [ -d ../../../../../../.idea/ ]; then
     {
         # rails
@@ -47,13 +48,16 @@ if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] |
             (# wordpress
                 [ -f ./wp-config.php ] || [ -f wp-config.php ] || [ -f ../wp-config.php ] || [ -f ../../wp-config.php ] || [ -f ../../../wp-config.php ] || [ -f ../../../../wp-config.php ] || [ -f ../../../../../wp-config.php ] || [ -f ../../../../../../wp-config.php ]
             ) ||
-            (# valet
+            (# the valet folder project $HOME/.valet or $HOME/.config/.valet
                 # bin  cli  composer.json  develop  LICENSE.txt  readme.md  SECURITY.md  server.php  valet
                 # bin  cli  composer.json  composer.lock  develop  LICENSE.txt  readme.md  SECURITY.md  server.php  valet  vendor
-                [ -d ./bin ] || [ -d ./cli ] || [ -f ./composer.json ] || [ -f ./develop ] || [ -f ./LICENSE.txt ] || [ -f ./readme.md ] || [ -f ./SECURITY.md ] || [ -f ./server.php ] || [ -f ./valet ]
+                [ -d ./bin ] && [ -d ./cli ] && [ -f ./composer.json ] && [ -f ./develop ] && [ -f ./LICENSE.txt ] && [ -f ./readme.md ] && [ -f ./SECURITY.md ] && [ -f ./server.php ] && [ -f ./valet ]
             ) ||
             (# just composer project
-                [ -f ./composer.json ] || [ -f ./composer.lock ] || [ -d ./vendor ]
+                   ([ -f ./composer.json ] && [ -f ./composer.lock ] && [ -d ./vendor ])   || \
+                   ([ -f ../composer.json ] && [ -f ../composer.lock ] && [ -d ../vendor ]) || \
+                   ([ -f ../../composer.json ] && [ -f ../../composer.lock ] && [ -d ../../vendor ]) || \
+                   ([ -f ../../../composer.json ] && [ -f ../../../composer.lock ] && [ -d ../../../vendor ])
             ) ||
             (
                 [[ "${clicked_extension}" == "php" ]]
@@ -62,9 +66,34 @@ if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] |
             {
                 pstorm ${@}
             }
-        else
+        elif
+            (# cds by SAP
+             # apis  bin  CHANGELOG.md  common.cds  developer-license-3.1.txt  etc  _i18n  lib  package.json  package-lock.json  README.md  server.js  SIGNATURE.SMF
+                ([ -f ./package.json ] && [ -f ./SIGNATURE.SMF ] && [ -d ./apis  ])
+           ) ||
+            (
+                [[ "${clicked_extension}" == "js" ]]
+            )
+        then
             {
                 webstorm ${@}
+            }
+        elif
+            (# guake
+             # AUTHORS    COPYING  env        guake        Makefile     NEWS.rst  Pipfile.lock  pyproject.toml  releasenotes          requirements.txt  setup.cfg
+             # ChangeLog  docs     git-hooks  MAINTAINERS  MANIFEST.in  Pipfile   po            README.rst      requirements-dev.txt  scripts           setup.py
+                ([ -f ./setup.py ] && [ -f ./Pipfile ] && [ -d ./guake  ])
+           ) ||
+            (
+                [[ "${clicked_extension}" == "py" ]]
+            )
+        then
+            {
+                charm ${@}
+            }
+        else  # any pattern above or combination fails, --> default to webstom
+            {
+                webstom ${@}
             }
         fi
     }
