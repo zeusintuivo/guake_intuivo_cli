@@ -93,7 +93,7 @@ if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] |
             }
         else  # any pattern above or combination fails, --> default to webstom
             {
-                webstom ${@}
+                subl ${@}
             }
         fi
     }
