@@ -91,9 +91,17 @@ if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] |
             {
                 charm ${@}
             }
-        else  # any pattern above or combination fails, --> default to webstom
+        elif
+            (
+                [[ "${clicked_extension}" == "sh" ]]
+            )
+        then
             {
-                subl ${@}
+                code -g ${@}
+            }
+        else  # any pattern above or combination fails, --> default to code
+            {
+                code -g ${@}
             }
         fi
     }
