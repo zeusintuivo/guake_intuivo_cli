@@ -26,6 +26,34 @@ function file_extension() {
     fi
 } # noitcunf file_extension
 
+function default_editor() {
+
+        if ( command -v code >/dev/null 2>&1 ); then 
+        {
+           code  ${@}
+           return 0
+        }
+        fi        
+        if ( command -v subl >/dev/null 2>&1 ); then 
+        {
+           subl  ${@}
+           return 0
+        }
+        fi
+
+
+    if [[  -n "${EDITOR}" ]] ; then 
+    {
+        if ( command -v "${EDITOR}" >/dev/null 2>&1 ); then 
+        {
+           "${EDITOR}"  ${@}
+        }
+        fi
+
+    }
+    fi
+} # end function default_editor
+
 clicked_extension=$(file_extension "${@}")
 echo $clicked_extension
 # If inside a JetBrains Folder is located, Assumption that you have installed it
@@ -97,16 +125,16 @@ if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] |
             )
         then
             {
-                code -g ${@}
+                default_editor -g ${@}
             }
         else  # any pattern above or combination fails, --> default to code
             {
-                code -g ${@}
+                default_editor -g ${@}
             }
         fi
     }
 else
     {
-        code -g ${@}
+        default_editor -g ${@}
     }
 fi
