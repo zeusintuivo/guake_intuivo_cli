@@ -20,38 +20,48 @@ function file_extension() {
     if [[ "${test_value}" == *":"* ]] ; then
     {
         echo "${test_value}" | cut -d":" -f1
-    } else {
+    } 
+    else 
+    {
         echo "${test_value}"
     }
     fi
 } # noitcunf file_extension
 
 function default_editor() {
-
-        if ( command -v code >/dev/null 2>&1 ); then 
-        {
-           code  ${@}
-           return 0
-        }
-        fi        
-        if ( command -v subl >/dev/null 2>&1 ); then 
-        {
-           subl  ${@}
-           return 0
-        }
-        fi
-
-
+     [ -f .temp_keys ] && . .temp_keys 
     if [[  -n "${EDITOR}" ]] ; then 
     {
         if ( command -v "${EDITOR}" >/dev/null 2>&1 ); then 
         {
-           "${EDITOR}"  ${@}
+           "${EDITOR}" ${@}
+           return 0
         }
         fi
 
     }
     fi
+        if ( command -v code >/dev/null 2>&1 ); then 
+        {
+           code -g ${*}
+           return 0
+        }
+        fi        
+        if ( command -v subl >/dev/null 2>&1 ); then 
+        {
+           subl  ${*}
+           return 0
+        }
+        fi
+        if ( command -v code-insiders >/dev/null 2>&1 ); then 
+        {
+           code-insiders -g  ${*}
+           return 0
+        }
+        fi
+
+
+
 } # end function default_editor
 
 clicked_extension=$(file_extension "${@}")
@@ -89,8 +99,7 @@ if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] |
             ) ||
             (
                 [[ "${clicked_extension}" == "php" ]]
-            )
-        then
+            ) ; then 
             {
                 pstorm ${@}
             }
@@ -101,8 +110,20 @@ if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] |
            ) ||
             (
                 [[ "${clicked_extension}" == "js" ]]
-            )
-        then
+            ) ; then
+            {
+                webstorm ${@}
+            }
+        elif
+            (# typescript REACT
+            # cloudbuild.yaml        cypress       global.d.ts                        jest.config.js  OWNERS             packages   terraform             tsconfig.json
+            # commit_exception.list  cypress.json  Jenkinsfile-Editor-CleanUp-GCloud  lerna.json      package.json       README.md  test                  unstage_exception_list
+            # cors-bucket-config.js  e2e           Jenkinsfile-Editor-E2E-Test        node_modules    package-lock.json  scripts    tsconfig.eslint.json  yarn.lock
+                ([ -f ./package.json ] && [ -f ./tsconfig.json ]  && [ -f ./tsconfig.json ] && [ -d ./cypress  ])
+           ) ||
+            (
+                [[ "${clicked_extension}" == "tsx" ]]
+            ) ; then
             {
                 webstorm ${@}
             }
