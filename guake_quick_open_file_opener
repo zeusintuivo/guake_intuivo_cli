@@ -274,6 +274,7 @@ function _main(){
           {
             echo Running 15 .1
             echo webstorm "${*}"
+            xdotool search --name website windowactivate
             webstorm "${*}"
             echo Running 15 .2
             echo code-insiders -g "${*}"
