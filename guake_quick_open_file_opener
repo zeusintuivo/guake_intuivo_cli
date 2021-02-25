@@ -5,12 +5,31 @@
 #
 # Suggesged to Place under Quick Open  PATTERN: /usr/local/bin/guake_quick_open_file_opener %(file_path)s:%(line_number)s
 
-echo "You cliked: ${@}"
-function file_extension() {
+function _main(){
+  local DEBUG=1
+  local clicked_extension
+  local clicked_name
+  local clicked_linenumber
+  echo "You cliked: ${*}"
+  function file_name() {
     #
     # Outputs the file extension given a file name
     #
-    # $1 - Filename
+    # $1 = Filename.ext:linenummer
+    #
+    # Usage: extension=$(file_name "foo/bar.baz")
+    #   Result: $extension ==> "baz"
+    #
+    #
+    local test_value=$(echo "${1%:*}")
+    echo "${test_value}"
+  } # end file_name
+
+  function file_extension() {
+    #
+    # Outputs the file extension given a file name
+    #
+    # $1 = Filename.ext:linenummer
     #
     # Usage: extension=$(file_extension "foo/bar.baz")
     #   Result: $extension ==> "baz"
@@ -19,143 +38,284 @@ function file_extension() {
     local test_value=$(echo "${1##*.}")
     if [[ "${test_value}" == *":"* ]] ; then
     {
-        echo "${test_value}" | cut -d":" -f1
-    } 
-    else 
+      echo "${test_value}" | cut -d":" -f1
+    }
+    else
     {
-        echo "${test_value}"
+      echo "${test_value}"
     }
     fi
-} # noitcunf file_extension
+  } # end file_extension
 
-function default_editor() {
-     [ -f .temp_keys ] && . .temp_keys 
-    if [[  -n "${EDITOR}" ]] ; then 
+  function line_number() {
+    #
+    # Outputs the line number given a file name
+    #
+    # $1 = Filename:linenummer
+    #
+    # Usage: extension=$(line_number "foo/bar.baz")
+    #   Result: $extension ==> "baz"
+    #
+    #
+    local test_value=$(echo "${1##*.}")
+    if [[ "${test_value}" == *":"* ]] ; then
     {
-        if ( command -v "${EDITOR}" >/dev/null 2>&1 ); then 
-        {
-           "${EDITOR}" ${@}
-           return 0
-        }
-        fi
-
+      echo "${test_value}" | cut -d":" -f2
+    }
+    else
+    {
+      echo "${test_value}"
     }
     fi
-        if ( command -v code >/dev/null 2>&1 ); then 
-        {
-           code -g ${*}
-           return 0
-        }
-        fi        
-        if ( command -v subl >/dev/null 2>&1 ); then 
-        {
-           subl  ${*}
-           return 0
-        }
-        fi
-        if ( command -v code-insiders >/dev/null 2>&1 ); then 
-        {
-           code-insiders -g  ${*}
-           return 0
-        }
-        fi
+  } # end line_number
 
-
-
-} # end function default_editor
-
-clicked_extension=$(file_extension "${@}")
-echo $clicked_extension
-# If inside a JetBrains Folder is located, Assumption that you have installed it
-if [ -d ./.idea/ ] || [ -d .idea/ ] || [ -d ../.idea/ ] || [ -d ../../.idea/ ] || [ -d ../../../.idea/ ] || [ -d ../../../../.idea/ ] || [ -d ../../../../../.idea/ ] || [ -d ../../../../../../.idea/ ]; then
+  function default_editor() {
+    #  args={"vim", "+"..lineno, name}
+    # -- args={"nano", "+"..lineno, name}
+    # -- args={"pstorm", name..":"..lineno}
+    # -- args={"mine", name..":"..lineno}
+    # -- args={"webstorm", name..":"..lineno}
+    # -- args={"charm", name..":"..lineno}
+    # -- args={"subl", name..":"..lineno}
+    # -- args={"brackets", name}
+    # -- args={"code", "-g", name..":"..lineno}
+    # -- args={"code-insiders", "-g", name..":"..lineno}
+    echo clicked_linenumber:$clicked_linenumber
+    set +e
+    [ -f .temp_keys ] && . .temp_keys
+    if [[  -n "${EDITOR}" ]] ; then
     {
-        # rails
-        if (
-            [ -f ./Gemfile.lock ] || [ -f Gemfile.lock ] || [ -f ../Gemfile.lock ] || [ -f ../../Gemfile.lock ] || [ -f ../../../Gemfile.lock ] || [ -f ../../../../Gemfile.lock ] || [ -f ../../../../../Gemfile.lock ] || [ -f ../../../../../../Gemfile.lock ]
-        ) ||
-            (
-                [[ "${clicked_extension}" == "rb" ]]
-            ); then
-            {
-                mine ${@}
-            }
-        elif
-            (# laravel
-                [ -f ./composer.lock ] || [ -f composer.lock ] || [ -f ../composer.lock ] || [ -f ../../composer.lock ] || [ -f ../../../composer.lock ] || [ -f ../../../../composer.lock ] || [ -f ../../../../../composer.lock ] || [ -f ../../../../../../composer.lock ]
-            ) ||
-            (# wordpress
-                [ -f ./wp-config.php ] || [ -f wp-config.php ] || [ -f ../wp-config.php ] || [ -f ../../wp-config.php ] || [ -f ../../../wp-config.php ] || [ -f ../../../../wp-config.php ] || [ -f ../../../../../wp-config.php ] || [ -f ../../../../../../wp-config.php ]
-            ) ||
-            (# the valet folder project $HOME/.valet or $HOME/.config/.valet
-                # bin  cli  composer.json  develop  LICENSE.txt  readme.md  SECURITY.md  server.php  valet
-                # bin  cli  composer.json  composer.lock  develop  LICENSE.txt  readme.md  SECURITY.md  server.php  valet  vendor
-                [ -d ./bin ] && [ -d ./cli ] && [ -f ./composer.json ] && [ -f ./develop ] && [ -f ./LICENSE.txt ] && [ -f ./readme.md ] && [ -f ./SECURITY.md ] && [ -f ./server.php ] && [ -f ./valet ]
-            ) ||
-            (# just composer project
-                   ([ -f ./composer.json ] && [ -f ./composer.lock ] && [ -d ./vendor ])   || \
-                   ([ -f ../composer.json ] && [ -f ../composer.lock ] && [ -d ../vendor ]) || \
-                   ([ -f ../../composer.json ] && [ -f ../../composer.lock ] && [ -d ../../vendor ]) || \
-                   ([ -f ../../../composer.json ] && [ -f ../../../composer.lock ] && [ -d ../../../vendor ])
-            ) ||
-            (
-                [[ "${clicked_extension}" == "php" ]]
-            ) ; then 
-            {
-                pstorm ${@}
-            }
-        elif
-            (# cds by SAP
-             # apis  bin  CHANGELOG.md  common.cds  developer-license-3.1.txt  etc  _i18n  lib  package.json  package-lock.json  README.md  server.js  SIGNATURE.SMF
-                ([ -f ./package.json ] && [ -f ./SIGNATURE.SMF ] && [ -d ./apis  ])
-           ) ||
-            (
-                [[ "${clicked_extension}" == "js" ]]
-            ) ; then
-            {
-                webstorm ${@}
-            }
-        elif
-            (# typescript REACT
-            # cloudbuild.yaml        cypress       global.d.ts                        jest.config.js  OWNERS             packages   terraform             tsconfig.json
-            # commit_exception.list  cypress.json  Jenkinsfile-Editor-CleanUp-GCloud  lerna.json      package.json       README.md  test                  unstage_exception_list
-            # cors-bucket-config.js  e2e           Jenkinsfile-Editor-E2E-Test        node_modules    package-lock.json  scripts    tsconfig.eslint.json  yarn.lock
-                ([ -f ./package.json ] && [ -f ./tsconfig.json ]  && [ -f ./tsconfig.json ] && [ -d ./cypress  ])
-           ) ||
-            (
-                [[ "${clicked_extension}" == "tsx" ]]
-            ) ; then
-            {
-                webstorm ${@}
-            }
-        elif
-            (# guake
-             # AUTHORS    COPYING  env        guake        Makefile     NEWS.rst  Pipfile.lock  pyproject.toml  releasenotes          requirements.txt  setup.cfg
-             # ChangeLog  docs     git-hooks  MAINTAINERS  MANIFEST.in  Pipfile   po            README.rst      requirements-dev.txt  scripts           setup.py
-                ([ -f ./setup.py ] && [ -f ./Pipfile ] && [ -d ./guake  ])
-           ) ||
-            (
-                [[ "${clicked_extension}" == "py" ]]
-            )
-        then
-            {
-                charm ${@}
-            }
-        elif
-            (
-                [[ "${clicked_extension}" == "sh" ]]
-            )
-        then
-            {
-                default_editor -g ${@}
-            }
-        else  # any pattern above or combination fails, --> default to code
-            {
-                default_editor -g ${@}
-            }
+      if ( command -v "${EDITOR}" >/dev/null 2>&1 ); then
+      {
+        if [[ "${EDITOR}" == *"code-insiders" ]] ; then
+        {
+          echo Running 1
+          echo "${EDITOR}" -g "${*}"
+          "${EDITOR}" -g "${*}"
+          return 0
+        }
+        elif [[ "${EDITOR}" == *"code" ]] ; then
+        {
+          echo Running 2
+          echo "${EDITOR}" -g "${*}"
+          "${EDITOR}" -g "${*}"
+          return 0
+        }
+        elif [[ "${EDITOR}" == *"nano" ]] ; then
+        {
+          echo Running 4
+          echo "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
+          "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
+          return 0
+        }
+        elif [[ "${EDITOR}" == *"vim" ]] ; then
+        {
+          echo Running 5
+          echo "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
+          "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
+          return 0
+        }
+        elif [[ "${EDITOR}" == *"brackets" ]] ; then
+        {
+          echo Running 6
+          echo "${EDITOR}" "${clicked_name}"
+          "${EDITOR}" "${clicked_name}"
+          return 0
+        }
+        else
+        {
+          echo Running 7
+          echo "${EDITOR}" "${*}"
+          "${EDITOR}" "${*}"
+          return 0
+        }
         fi
+        echo Running 8
+        echo "${EDITOR}" "${*}"
+        "${EDITOR}" "${*}"
+        return 0
+      }
+      fi
     }
-else
+    fi
+    if ( command -v code >/dev/null 2>&1 ); then
     {
-        default_editor -g ${@}
+      echo Running 9
+      echo code -g "${*}"
+      code -g "${*}"
+      return 0
     }
-fi
+    fi
+    if ( command -v subl >/dev/null 2>&1 ); then
+    {
+      echo Running 10
+      echo subl  "${*}"
+      subl  "${*}"
+      return 0
+    }
+    fi
+    if ( command -v code-insiders >/dev/null 2>&1 ); then
+    {
+      echo Running 11
+      echo code-insiders -g  "${*}"
+      code-insiders -g  "${*}"
+      return 0
+    }
+    fi
+  } # end default_editor
+
+  (( DEBUG )) && echo "file_name:$(file_name "${*}")"
+  clicked_name=$(file_name "${*}")
+  (( DEBUG )) && echo "file_extension:$(file_extension "${*}")"
+  clicked_extension=$(file_extension "${*}")
+  if [[ "${clicked_extension}" == "${clicked_name}" ]] ; then
+  {
+    clicked_extension=""
+  }
+  fi
+  echo clicked_extension:$clicked_extension
+  (( DEBUG )) && echo "line_number:$(line_number "${*}")"
+  clicked_linenumber=$(line_number "${*}")
+  # (( DEBUG )) && exit 0
+
+  # If inside a JetBrains Folder is located, Assumption that you have installed it
+  if  (# jetbrains
+      [ -d ./.idea/ ] ||
+      [ -d .idea/ ] ||
+      [ -d ../.idea/ ] ||
+      [ -d ../../.idea/ ] ||
+      [ -d ../../../.idea/ ] ||
+      [ -d ../../../../.idea/ ] ||
+      [ -d ../../../../../.idea/ ] ||
+      [ -d ../../../../../../.idea/ ]
+      ); then
+  {
+      if (# rails
+            [ -f ./Gemfile.lock ] ||
+            [ -f Gemfile.lock ] ||
+            [ -f ../Gemfile.lock ] ||
+            [ -f ../../Gemfile.lock ] ||
+            [ -f ../../../Gemfile.lock ] ||
+            [ -f ../../../../Gemfile.lock ] ||
+            [ -f ../../../../../Gemfile.lock ] ||
+            [ -f ../../../../../../Gemfile.lock ]
+          ) ||
+          (
+            [[ "${clicked_extension}" == "rb" ]]
+          ); then
+          {
+            echo Running 12
+            echo mine "${*}"
+            mine "${*}"
+          }
+      elif
+          (# laravel
+              [ -f ./composer.lock ] ||
+              [ -f composer.lock ] ||
+              [ -f ../composer.lock ] ||
+              [ -f ../../composer.lock ] ||
+              [ -f ../../../composer.lock ] ||
+              [ -f ../../../../composer.lock ] ||
+              [ -f ../../../../../composer.lock ] ||
+              [ -f ../../../../../../composer.lock ]
+          ) ||
+          (# wordpress
+              [ -f ./wp-config.php ] ||
+              [ -f wp-config.php ] ||
+              [ -f ../wp-config.php ] ||
+              [ -f ../../wp-config.php ] ||
+              [ -f ../../../wp-config.php ] ||
+              [ -f ../../../../wp-config.php ] ||
+              [ -f ../../../../../wp-config.php ] ||
+              [ -f ../../../../../../wp-config.php ]
+          ) ||
+          (# the valet folder project $HOME/.valet or $HOME/.config/.valet
+              # bin  cli  composer.json  develop  LICENSE.txt  readme.md  SECURITY.md  server.php  valet
+              # bin  cli  composer.json  composer.lock  develop  LICENSE.txt  readme.md  SECURITY.md  server.php  valet  vendor
+              [ -d ./bin ] && [ -d ./cli ] && [ -f ./composer.json ] && [ -f ./develop ] && [ -f ./LICENSE.txt ] && [ -f ./readme.md ] && [ -f ./SECURITY.md ] && [ -f ./server.php ] && [ -f ./valet ]
+          ) ||
+          (# just composer project
+                 ([ -f ./composer.json ] && [ -f ./composer.lock ] && [ -d ./vendor ])   || \
+                 ([ -f ../composer.json ] && [ -f ../composer.lock ] && [ -d ../vendor ]) || \
+                 ([ -f ../../composer.json ] && [ -f ../../composer.lock ] && [ -d ../../vendor ]) || \
+                 ([ -f ../../../composer.json ] && [ -f ../../../composer.lock ] && [ -d ../../../vendor ])
+          ) ||
+          (
+              [[ "${clicked_extension}" == "php" ]]
+          ) ; then
+          {
+            echo Running 13
+            echo pstorm "${*}"
+            pstorm "${*}"
+          }
+      elif
+          (# cds by SAP
+           # apis  bin  CHANGELOG.md  common.cds  developer-license-3.1.txt  etc  _i18n  lib  package.json  package-lock.json  README.md  server.js  SIGNATURE.SMF
+              ([ -f ./package.json ] && [ -f ./SIGNATURE.SMF ] && [ -d ./apis  ])
+          ) ||
+          (
+              [[ "${clicked_extension}" == "js" ]]
+          ) ; then
+          {
+            echo Running 14
+            echo webstorm "${*}"
+            webstorm "${*}"
+          }
+      elif
+          (# typescript REACT
+          # cloudbuild.yaml        cypress       global.d.ts                        jest.config.js  OWNERS             packages   terraform             tsconfig.json
+          # commit_exception.list  cypress.json  Jenkinsfile-Editor-CleanUp-GCloud  lerna.json      package.json       README.md  test                  unstage_exception_list
+          # cors-bucket-config.js  e2e           Jenkinsfile-Editor-E2E-Test        node_modules    package-lock.json  scripts    tsconfig.eslint.json  yarn.lock
+              ([ -f ./package.json ] && [ -f ./tsconfig.json ]  && [ -f ./tsconfig.json ] && [ -d ./cypress  ])
+         ) ||
+          (
+              [[ "${clicked_extension}" == "tsx" ]]
+          ) ; then
+          {
+            echo Running 15 .1
+            echo webstorm "${*}"
+            webstorm "${*}"
+            echo Running 15 .2
+            echo code-insiders -g "${*}"
+            code-insiders -g "${*}"
+          }
+      elif
+          (# guake
+           # AUTHORS    COPYING  env        guake        Makefile     NEWS.rst  Pipfile.lock  pyproject.toml  releasenotes          requirements.txt  setup.cfg
+           # ChangeLog  docs     git-hooks  MAINTAINERS  MANIFEST.in  Pipfile   po            README.rst      requirements-dev.txt  scripts           setup.py
+              ([ -f ./setup.py ] && [ -f ./Pipfile ] && [ -d ./guake  ])
+         ) ||
+          (
+              [[ "${clicked_extension}" == "py" ]]
+          )
+      then
+          {
+            echo Running 16
+            echo charm "${*}"
+            charm "${*}"
+          }
+      elif
+          (
+              [[ "${clicked_extension}" == "sh" ]]
+          )
+      then
+          {
+            echo Going default 1
+            default_editor "${*}"
+          }
+      else  # any pattern above or combination fails, --> default to code
+          {
+            echo Going default 2
+            default_editor "${*}"
+          }
+      fi
+  }
+  else
+  {
+    echo Going default 3
+    default_editor "${*}"
+  }
+  fi
+} # end _main
+
+_main "${*}"
