@@ -122,6 +122,17 @@ function _main(){
           "${EDITOR}" "${clicked_name}"
           return 0
         }
+        elif [[ "${EDITOR}" == *"webstorm" ]] ; then
+        {
+          echo Running 7
+          echo "${EDITOR}" "${*}"
+          # xdotool search --name website windowactivate  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
+          # "${EDITOR}" "${*}"
+          webstorm "${*}"
+          # xdotool search --name website windowactivate  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
+          # "${EDITOR}" "${*}"
+          return 0
+        }
         else
         {
           echo Running 7
@@ -274,11 +285,12 @@ function _main(){
           {
             echo Running 15 .1
             echo webstorm "${*}"
-            xdotool search --name website windowactivate
+            xdotool search --name website windowactivate  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
             webstorm "${*}"
-            echo Running 15 .2
-            echo code-insiders -g "${*}"
-            code-insiders -g "${*}"
+            xdotool search --name website windowactivate  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
+            # echo Running 15 .2
+            # echo code-insiders -g "${*}"
+            # code-insiders -g "${*}"
           }
       elif
           (# guake
