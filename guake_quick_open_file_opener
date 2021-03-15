@@ -4,13 +4,49 @@
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
 # Suggesged to Place under Quick Open  PATTERN: /usr/local/bin/guake_quick_open_file_opener %(file_path)s:%(line_number)s
-
+ open_command () {
+    emulate -L zsh
+    setopt shwordsplit
+    local open_cmd
+    case "$OSTYPE" in
+        (darwin*) open_cmd='open' ;;
+        (cygwin*) open_cmd='cygstart' ;;
+        (linux*) open_cmd='xdg-open' ;;
+        (msys*) open_cmd='start ""' ;;
+        (*) echo "Platform $OSTYPE not supported"
+            return 1 ;;
+    esac
+    if [[ "$OSTYPE" = darwin* ]] ; then
+        $open_cmd "$@" &> /dev/null
+    else
+        nohup $open_cmd "$@" &> /dev/null
+    fi
+ }
+output_question () {
+  emulate -L zsh
+  setopt shwordsplit
+  local open_cmd
+  case "$OSTYPE" in
+    (darwin*) open_cmd='0' ;;
+    (cygwin*) open_cmd='1' ;;
+    (linux*) open_cmd='1' ;;
+    (msys*) open_cmd='1' ;;
+    (*) open_cmd='1' ;;
+  esac
+  if [[ "$open_cmd" = '1' ]] ; then
+    echo 1
+    return 1
+  fi
+  echo 0
+  return 0
+}
+SHOWOUTPUT=$(output_question)
 function _main(){
   local DEBUG=1
   local clicked_extension
   local clicked_name
   local clicked_linenumber
-  echo "You cliked: ${*}"
+  (( SHOWOUTPUT )) && echo "You cliked: ${*}"
   function file_name() {
     #
     # Outputs the file extension given a file name
@@ -80,8 +116,8 @@ function _main(){
     # -- args={"brackets", name}
     # -- args={"code", "-g", name..":"..lineno}
     # -- args={"code-insiders", "-g", name..":"..lineno}
-    echo clicked_linenumber:$clicked_linenumber
-    set +e
+    (( SHOWOUTPUT )) && echo clicked_linenumber:$clicked_linenumber
+    (( SHOWOUTPUT )) && set +e
     [ -f .temp_keys ] && . .temp_keys
     if [[  -n "${EDITOR}" ]] ; then
     {
@@ -89,43 +125,43 @@ function _main(){
       {
         if [[ "${EDITOR}" == *"code-insiders" ]] ; then
         {
-          echo Running 1
-          echo "${EDITOR}" -g "${*}"
+          (( SHOWOUTPUT )) && echo Running 1
+          (( SHOWOUTPUT )) && echo "${EDITOR}" -g "${*}"
           "${EDITOR}" -g "${*}"
           return 0
         }
         elif [[ "${EDITOR}" == *"code" ]] ; then
         {
-          echo Running 2
-          echo "${EDITOR}" -g "${*}"
+          (( SHOWOUTPUT )) && echo Running 2
+          (( SHOWOUTPUT )) && echo "${EDITOR}" -g "${*}"
           "${EDITOR}" -g "${*}"
           return 0
         }
         elif [[ "${EDITOR}" == *"nano" ]] ; then
         {
-          echo Running 4
-          echo "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
+          (( SHOWOUTPUT )) && echo Running 4
+          (( SHOWOUTPUT )) && echo "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
           "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
           return 0
         }
         elif [[ "${EDITOR}" == *"vim" ]] ; then
         {
-          echo Running 5
-          echo "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
+          (( SHOWOUTPUT )) && echo Running 5
+          (( SHOWOUTPUT )) && echo "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
           "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
           return 0
         }
         elif [[ "${EDITOR}" == *"brackets" ]] ; then
         {
-          echo Running 6
-          echo "${EDITOR}" "${clicked_name}"
+          (( SHOWOUTPUT )) && echo Running 6
+          (( SHOWOUTPUT )) && echo "${EDITOR}" "${clicked_name}"
           "${EDITOR}" "${clicked_name}"
           return 0
         }
         elif [[ "${EDITOR}" == *"webstorm" ]] ; then
         {
-          echo Running 7
-          echo "${EDITOR}" "${*}"
+          (( SHOWOUTPUT )) && echo Running 7
+          (( SHOWOUTPUT )) && echo "${EDITOR}" "${*}"
           # xdotool search --name website windowactivate  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
           # "${EDITOR}" "${*}"
           webstorm "${*}"
@@ -135,57 +171,63 @@ function _main(){
         }
         else
         {
-          echo Running 7
-          echo "${EDITOR}" "${*}"
+          (( SHOWOUTPUT )) && echo Running 7
+          (( SHOWOUTPUT )) && echo "${EDITOR}" "${*}"
           "${EDITOR}" "${*}"
           return 0
         }
         fi
-        echo Running 8
-        echo "${EDITOR}" "${*}"
+        (( SHOWOUTPUT )) && echo Running 8
+        (( SHOWOUTPUT )) && echo "${EDITOR}" "${*}"
         "${EDITOR}" "${*}"
         return 0
       }
       fi
     }
-    fi
-    if ( command -v code >/dev/null 2>&1 ); then
+    else  # EDITOR VAR not found  
     {
-      echo Running 9
-      echo code -g "${*}"
-      code -g "${*}"
-      return 0
-    }
-    fi
-    if ( command -v subl >/dev/null 2>&1 ); then
-    {
-      echo Running 10
-      echo subl  "${*}"
-      subl  "${*}"
-      return 0
-    }
-    fi
-    if ( command -v code-insiders >/dev/null 2>&1 ); then
-    {
-      echo Running 11
-      echo code-insiders -g  "${*}"
-      code-insiders -g  "${*}"
-      return 0
+      if ( command -v subl >/dev/null 2>&1 ); then
+      {
+        (( SHOWOUTPUT )) && echo Running 10
+        (( SHOWOUTPUT )) && echo subl  "${*}"
+        subl  "${*}"
+        return 0
+      }
+      elif ( command -v code >/dev/null 2>&1 ); then
+      {
+        (( SHOWOUTPUT )) && echo Running 9
+        (( SHOWOUTPUT )) && echo code -g "${*}"
+        code -g "${*}"
+        return 0
+      }
+      elif ( command -v code-insiders >/dev/null 2>&1 ); then
+      {
+        (( SHOWOUTPUT )) && echo Running 11
+        (( SHOWOUTPUT )) && echo code-insiders -g  "${*}"
+        code-insiders -g  "${*}"
+        return 0
+      }
+      else 
+      {
+        (( SHOWOUTPUT )) && echo Running 17
+        open_command "${*}"      
+      }
+      fi
     }
     fi
   } # end default_editor
 
-  (( DEBUG )) && echo "file_name:$(file_name "${*}")"
+  (( DEBUG )) && (( SHOWOUTPUT )) && echo "file_name:$(file_name "${*}")"
   clicked_name=$(file_name "${*}")
-  (( DEBUG )) && echo "file_extension:$(file_extension "${*}")"
+  (( DEBUG )) && (( SHOWOUTPUT )) && echo "file_extension:$(file_extension "${*}")"
   clicked_extension=$(file_extension "${*}")
   if [[ "${clicked_extension}" == "${clicked_name}" ]] ; then
   {
     clicked_extension=""
   }
   fi
-  echo clicked_extension:$clicked_extension
-  (( DEBUG )) && echo "line_number:$(line_number "${*}")"
+  (( SHOWOUTPUT )) && echo clicked_extension:$clicked_extension
+  (( DEBUG )) && (( SHOWOUTPUT )) && echo "line_number:$(line_number "${*}")"
   clicked_linenumber=$(line_number "${*}")
   # (( DEBUG )) && exit 0
 
@@ -215,8 +257,8 @@ function _main(){
             [[ "${clicked_extension}" == "rb" ]]
           ); then
           {
-            echo Running 12
-            echo mine "${*}"
+            (( SHOWOUTPUT )) && echo Running 12
+            (( SHOWOUTPUT )) && echo mine "${*}"
             mine "${*}"
           }
       elif
@@ -255,8 +297,8 @@ function _main(){
               [[ "${clicked_extension}" == "php" ]]
           ) ; then
           {
-            echo Running 13
-            echo pstorm "${*}"
+            (( SHOWOUTPUT )) && echo Running 13
+            (( SHOWOUTPUT )) && echo pstorm "${*}"
             pstorm "${*}"
           }
       elif
@@ -268,8 +310,8 @@ function _main(){
               [[ "${clicked_extension}" == "js" ]]
           ) ; then
           {
-            echo Running 14
-            echo webstorm "${*}"
+            (( SHOWOUTPUT )) && echo Running 14
+            (( SHOWOUTPUT )) && echo webstorm "${*}"
             webstorm "${*}"
           }
       elif
@@ -283,12 +325,12 @@ function _main(){
               [[ "${clicked_extension}" == "tsx" ]]
           ) ; then
           {
-            echo Running 15 .1
-            echo webstorm "${*}"
-            xdotool search --name website windowactivate  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
+            (( SHOWOUTPUT )) && echo Running 15 .1
+            (( SHOWOUTPUT )) && echo webstorm "${*}"
+            (( SHOWOUTPUT )) && xdotool search --name website windowactivate  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
             webstorm "${*}"
-            xdotool search --name website windowactivate  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
-            # echo Running 15 .2
+            (( SHOWOUTPUT )) && ( command -v xdotool >/dev/null 2>&1 ) && xdotool search --name website windowactivate  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
+            # (( SHOWOUTPUT )) && echo Running 15 .2
             # echo code-insiders -g "${*}"
             # code-insiders -g "${*}"
           }
@@ -303,8 +345,8 @@ function _main(){
           )
       then
           {
-            echo Running 16
-            echo charm "${*}"
+            (( SHOWOUTPUT )) && echo Running 16
+            (( SHOWOUTPUT )) && echo charm "${*}"
             charm "${*}"
           }
       elif
@@ -313,19 +355,19 @@ function _main(){
           )
       then
           {
-            echo Going default 1
+            (( SHOWOUTPUT )) && echo Going default 1
             default_editor "${*}"
           }
       else  # any pattern above or combination fails, --> default to code
           {
-            echo Going default 2
+            (( SHOWOUTPUT )) && echo Going default 2
             default_editor "${*}"
           }
       fi
   }
-  else
+  else # not .idea folder then going defaut editor logic
   {
-    echo Going default 3
+    (( SHOWOUTPUT )) && echo Going default 3
     default_editor "${*}"
   }
   fi
