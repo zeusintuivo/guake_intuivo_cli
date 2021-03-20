@@ -5,8 +5,8 @@
 #
 # Suggesged to Place under Quick Open  PATTERN: /usr/local/bin/guake_quick_open_file_opener %(file_path)s:%(line_number)s
  open_command () {
-    emulate -L zsh
-    setopt shwordsplit
+    # emulate -L zsh
+    # setopt shwordsplit
     local open_cmd
     case "$OSTYPE" in
         (darwin*) open_cmd='open' ;;
@@ -23,8 +23,8 @@
     fi
  }
 output_question () {
-  emulate -L zsh
-  setopt shwordsplit
+  # emulate -L zsh
+  # setopt shwordsplit
   local open_cmd
   case "$OSTYPE" in
     (darwin*) open_cmd='0' ;;
@@ -126,42 +126,42 @@ function _main(){
         if [[ "${EDITOR}" == *"code-insiders" ]] ; then
         {
           (( SHOWOUTPUT )) && echo Running 1
-          (( SHOWOUTPUT )) && echo "${EDITOR}" -g "${*}"
+          echo "${EDITOR}" -g "${*}"
           "${EDITOR}" -g "${*}"
           return 0
         }
         elif [[ "${EDITOR}" == *"code" ]] ; then
         {
           (( SHOWOUTPUT )) && echo Running 2
-          (( SHOWOUTPUT )) && echo "${EDITOR}" -g "${*}"
+          echo "${EDITOR}" -g "${*}"
           "${EDITOR}" -g "${*}"
           return 0
         }
         elif [[ "${EDITOR}" == *"nano" ]] ; then
         {
           (( SHOWOUTPUT )) && echo Running 4
-          (( SHOWOUTPUT )) && echo "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
+          echo "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
           "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
           return 0
         }
         elif [[ "${EDITOR}" == *"vim" ]] ; then
         {
           (( SHOWOUTPUT )) && echo Running 5
-          (( SHOWOUTPUT )) && echo "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
+          echo "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
           "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
           return 0
         }
         elif [[ "${EDITOR}" == *"brackets" ]] ; then
         {
           (( SHOWOUTPUT )) && echo Running 6
-          (( SHOWOUTPUT )) && echo "${EDITOR}" "${clicked_name}"
+          echo "${EDITOR}" "${clicked_name}"
           "${EDITOR}" "${clicked_name}"
           return 0
         }
         elif [[ "${EDITOR}" == *"webstorm" ]] ; then
         {
           (( SHOWOUTPUT )) && echo Running 7
-          (( SHOWOUTPUT )) && echo "${EDITOR}" "${*}"
+          echo "${EDITOR}" "${*}"
           # xdotool search --name website windowactivate  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
           # "${EDITOR}" "${*}"
           webstorm "${*}"
@@ -172,13 +172,13 @@ function _main(){
         else
         {
           (( SHOWOUTPUT )) && echo Running 7
-          (( SHOWOUTPUT )) && echo "${EDITOR}" "${*}"
+          echo "${EDITOR}" "${*}"
           "${EDITOR}" "${*}"
           return 0
         }
         fi
         (( SHOWOUTPUT )) && echo Running 8
-        (( SHOWOUTPUT )) && echo "${EDITOR}" "${*}"
+        echo "${EDITOR}" "${*}"
         "${EDITOR}" "${*}"
         return 0
       }
@@ -186,24 +186,25 @@ function _main(){
     }
     else  # EDITOR VAR not found  
     {
+      echo subl  -g "${*}"
       if ( command -v subl >/dev/null 2>&1 ); then
       {
         (( SHOWOUTPUT )) && echo Running 10
-        (( SHOWOUTPUT )) && echo subl  "${*}"
+        echo "${EDITOR}"  "${*}"
         subl  "${*}"
         return 0
       }
       elif ( command -v code >/dev/null 2>&1 ); then
       {
         (( SHOWOUTPUT )) && echo Running 9
-        (( SHOWOUTPUT )) && echo code -g "${*}"
+        echo "${EDITOR}" -g "${*}"
         code -g "${*}"
         return 0
       }
       elif ( command -v code-insiders >/dev/null 2>&1 ); then
       {
         (( SHOWOUTPUT )) && echo Running 11
-        (( SHOWOUTPUT )) && echo code-insiders -g  "${*}"
+        echo "${EDITOR}" -g  "${*}"
         code-insiders -g  "${*}"
         return 0
       }
