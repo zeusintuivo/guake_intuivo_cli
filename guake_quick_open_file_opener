@@ -121,65 +121,70 @@ function _main(){
     [ -f .temp_keys ] && . .temp_keys
     if [[  -n "${EDITOR}" ]] ; then
     {
-      if ( command -v "${EDITOR}" >/dev/null 2>&1 ); then
+      (( SHOWOUTPUT )) && echo EDITOR defined
+      if ( command -v "${EDITOR}" >/dev/null 2>&1 ) || ([[ "${EDITOR}" == *"emacsnw" ]] && ( command -v emacs >/dev/null 2>&1 ) ); then
       {
-        if [[ "${EDITOR}" == *"code-insiders" ]] \
-          [[ "${EDITOR}" == *"code" ]] ; then
+        (( SHOWOUTPUT )) && echo Command  "${EDITOR}" found
+        if [[ "${EDITOR}" == *"code-insiders" ]] || \
+            [[ "${EDITOR}" == *"code" ]] ; then
         {
           (( SHOWOUTPUT )) && echo Running 2
           echo "${EDITOR}" -g "${*}"
-          "${EDITOR}" -g "${*}"
+          ${EDITOR} -g "${*}"
           return 0
         }
-        elif [[ "${EDITOR}" == *"nano" ]] \
-          [[ "${EDITOR}" == *"vim" ]] \
-          [[ "${EDITOR}" == *"emacs" ]] \
+        elif [[ "${EDITOR}" == *"nano" ]] || \
+          [[ "${EDITOR}" == *"vim" ]] || \
+          [[ "${EDITOR}" == *"emacs" ]] || \
           [[ "${EDITOR}" == *"emacsnw" ]] ; then
         {
+          [[ "${EDITOR}" == *"emacsnw" ]] && local EDITOR="emacs -nw"
           (( SHOWOUTPUT )) && echo Running 5
           echo "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
-          "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
+          ( ${EDITOR} +"${clicked_linenumber}" "${clicked_name}" )
           return 0
         }
         elif [[ "${EDITOR}" == *"brackets" ]] ; then
         {
           (( SHOWOUTPUT )) && echo Running 6
           echo "${EDITOR}" "${clicked_name}"
-          "${EDITOR}" "${clicked_name}"
+          ${EDITOR} "${clicked_name}"
           return 0
         }
-        elif [[ "${EDITOR}" == *"webstorm" ]] \
-          [[ "${EDITOR}" == *"charm" ]] \
-          [[ "${EDITOR}" == *"phpstorm" ]] \
+        elif [[ "${EDITOR}" == *"webstorm" ]] || \
+          [[ "${EDITOR}" == *"charm" ]] || \
+          [[ "${EDITOR}" == *"phpstorm" ]] || \
           [[ "${EDITOR}" == *"mine" ]] ; then
         {
           (( SHOWOUTPUT )) && echo Running 7
           echo "${EDITOR}" "${*}"
           # xdotool search --name website windowactivate  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
           # "${EDITOR}" "${*}"
-          webstorm "${*}"
+          ${EDITOR} "${*}"
           # xdotool search --name website windowactivate  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
           # "${EDITOR}" "${*}"
           return 0
         }
         else
         {
+          (( SHOWOUTPUT )) && echo NO EDITOR in list of guake_quick_open_file_opener here attemping anyways
           (( SHOWOUTPUT )) && echo Running 7
           echo "${EDITOR}" "${*}"
-          "${EDITOR}" "${*}"
+          ${EDITOR} "${*}"
           return 0
         }
         fi
-        (( SHOWOUTPUT )) && echo Running 8
-        echo "${EDITOR}" "${*}"
-        "${EDITOR}" "${*}"
-        return 0
+      }
+      else
+      {
+        (( SHOWOUTPUT )) && echo EDITOR "${EDITOR}" not responding to 'command -v' command
       }
       fi
+
     }
-    else  # EDITOR VAR not found
+    else
     {
-      echo subl  -g "${*}"
+      (( SHOWOUTPUT )) && echo  EDITOR VAR not found
       if ( command -v subl >/dev/null 2>&1 ); then
       {
         (( SHOWOUTPUT )) && echo Running 10
@@ -203,6 +208,7 @@ function _main(){
       }
       else
       {
+        (( SHOWOUTPUT )) && echo Attempting to run default "open" command for this system
         (( SHOWOUTPUT )) && echo Running 17
         open_command "${*}"
       }
