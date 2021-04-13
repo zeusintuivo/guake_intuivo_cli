@@ -1012,7 +1012,7 @@ EXECUTING_SCRIPTS=1
 (( $DEBUG_MACHINE )) && echo -e "\\033[38;5;1mDEBUG_MACHINE:\\033[38;5;32m : ${DEBUG_MACHINE} :"
 
 
-#THINKING_MACHINE=0
+THINKING_MACHINE=1
 #DEBUG_MACHINE=0
 
 LOOPING=1
@@ -1110,7 +1110,7 @@ while (( $LOOPING )); do
         #(( $EXECUTING_SCRIPTS )) && sudo -u ${YOUR_USER_NAME} -H bash << GUAKEPROCESS
         #     sudo guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}"
 #GUAKEPROCESS
-      (( $EXECUTING_SCRIPTS )) && sudo guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}"
+      (( $EXECUTING_SCRIPTS )) && sudo guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}" &
       # TODO I have problems with guake install that I have to run it with sudo .... which causes a lot of issues when running everything else
       #(( $EXECUTING_SCRIPTS )) && su - ${YOUR_USER_NAME} -c """guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}" """
     }

@@ -123,28 +123,18 @@ function _main(){
     {
       if ( command -v "${EDITOR}" >/dev/null 2>&1 ); then
       {
-        if [[ "${EDITOR}" == *"code-insiders" ]] ; then
-        {
-          (( SHOWOUTPUT )) && echo Running 1
-          echo "${EDITOR}" -g "${*}"
-          "${EDITOR}" -g "${*}"
-          return 0
-        }
-        elif [[ "${EDITOR}" == *"code" ]] ; then
+        if [[ "${EDITOR}" == *"code-insiders" ]] \
+          [[ "${EDITOR}" == *"code" ]] ; then
         {
           (( SHOWOUTPUT )) && echo Running 2
           echo "${EDITOR}" -g "${*}"
           "${EDITOR}" -g "${*}"
           return 0
         }
-        elif [[ "${EDITOR}" == *"nano" ]] ; then
-        {
-          (( SHOWOUTPUT )) && echo Running 4
-          echo "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
-          "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
-          return 0
-        }
-        elif [[ "${EDITOR}" == *"vim" ]] ; then
+        elif [[ "${EDITOR}" == *"nano" ]] \
+          [[ "${EDITOR}" == *"vim" ]] \
+          [[ "${EDITOR}" == *"emacs" ]] \
+          [[ "${EDITOR}" == *"emacsnw" ]] ; then
         {
           (( SHOWOUTPUT )) && echo Running 5
           echo "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
@@ -158,7 +148,10 @@ function _main(){
           "${EDITOR}" "${clicked_name}"
           return 0
         }
-        elif [[ "${EDITOR}" == *"webstorm" ]] ; then
+        elif [[ "${EDITOR}" == *"webstorm" ]] \
+          [[ "${EDITOR}" == *"charm" ]] \
+          [[ "${EDITOR}" == *"phpstorm" ]] \
+          [[ "${EDITOR}" == *"mine" ]] ; then
         {
           (( SHOWOUTPUT )) && echo Running 7
           echo "${EDITOR}" "${*}"
@@ -184,7 +177,7 @@ function _main(){
       }
       fi
     }
-    else  # EDITOR VAR not found  
+    else  # EDITOR VAR not found
     {
       echo subl  -g "${*}"
       if ( command -v subl >/dev/null 2>&1 ); then
@@ -208,10 +201,10 @@ function _main(){
         code-insiders -g  "${*}"
         return 0
       }
-      else 
+      else
       {
         (( SHOWOUTPUT )) && echo Running 17
-        open_command "${*}"      
+        open_command "${*}"
       }
       fi
     }
