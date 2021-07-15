@@ -47,6 +47,7 @@ function _main(){
   local clicked_name
   local clicked_linenumber
   (( SHOWOUTPUT )) && echo "You cliked: ${*}"
+  (( SHOWOUTPUT )) && echo "Current pwd: $(pwd)"
   function file_name() {
     #
     # Outputs the file extension given a file name
