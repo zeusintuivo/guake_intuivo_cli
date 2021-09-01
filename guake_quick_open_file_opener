@@ -181,11 +181,11 @@ function _main(){
         (( SHOWOUTPUT )) && echo EDITOR "${EDITOR}" not responding to 'command -v' command
       }
       fi
-
     }
-    else
+    else  # EDITOR VAR not found  
     {
-      (( SHOWOUTPUT )) && echo  EDITOR VAR not found
+      echo subl  -g "${*}"
+      exit 0 
       if ( command -v subl >/dev/null 2>&1 ); then
       {
         (( SHOWOUTPUT )) && echo Running 10
