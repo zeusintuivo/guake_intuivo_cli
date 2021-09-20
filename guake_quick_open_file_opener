@@ -182,17 +182,18 @@ function _main(){
       }
       fi
     }
-    else  # EDITOR VAR not found  
+    else  # EDITOR VAR not found
     {
       (( SHOWOUTPUT )) && echo  EDITOR VAR not found
       if [[ "${*}" == *".rb"* ]] || [[ "${*}" == *"smart-workspace-backend"* ]] ; then
       {
-      	echo mine  "${*}"
+      	# echo mine  "${*}"
+        echo code -g  \""${*}"\"
       } else {
       	echo subl  -g "${*}"
       }
-      fi 
-      exit 0 
+      fi
+      exit 0
       if ( command -v subl >/dev/null 2>&1 ); then
       {
         (( SHOWOUTPUT )) && echo Running 10
