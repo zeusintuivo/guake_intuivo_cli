@@ -142,7 +142,8 @@ function _main(){
           [[ "${EDITOR}" == *"emacsnw" ]] && local EDITOR="emacs -nw"
           (( SHOWOUTPUT )) && echo Running 5
           echo "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
-          ( ${EDITOR} +"${clicked_linenumber}" "${clicked_name}" )
+          guake -e "( ${EDITOR} +"${clicked_linenumber}" "${clicked_name}" )"&
+          
           return 0
         }
         elif [[ "${EDITOR}" == *"brackets" ]] ; then
@@ -161,8 +162,9 @@ function _main(){
           echo "${EDITOR}" "${*}"
           # xdotool search --name website windowactivate  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
           # "${EDITOR}" "${*}"
-          ${EDITOR} "${*}"
-          # xdotool search --name website windowactivate  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
+          guake -e "(${EDITOR} "${*}")"&
+          xdotool search --name "${EDITOR}"  windowactivate&  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
+ 	  guake --hide&
           # "${EDITOR}" "${*}"
           return 0
         }
@@ -189,9 +191,11 @@ function _main(){
       {
       	# echo mine  "${*}"
         echo code -g  \""${*}"\"
+        guake --hide&
       } else {
       	echo subl  -g "${*}"
-      }
+        guake --hide&
+      } 
       fi
       exit 0
       if ( command -v subl >/dev/null 2>&1 ); then
