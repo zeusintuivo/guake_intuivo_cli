@@ -4,7 +4,8 @@
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
 # Suggesged to Place under Quick Open  PATTERN: /usr/local/bin/guake_quick_open_file_opener %(file_path)s:%(line_number)s
- open_command () {
+
+function open_command() {
     # emulate -L zsh
     # setopt shwordsplit
     local open_cmd
@@ -22,10 +23,11 @@
         nohup $open_cmd "$@" &> /dev/null
     fi
  }
-output_question () {
+function output_question() {
   # emulate -L zsh
   # setopt shwordsplit
   local open_cmd
+  # $OSTPYE is a global env Variable normally expected to be found
   case "$OSTYPE" in
     (darwin*) open_cmd='0' ;;
     (cygwin*) open_cmd='1' ;;
@@ -40,6 +42,60 @@ output_question () {
   echo 0
   return 0
 }
+function sdin_available(){
+# REF: https://scripter.co/nim-check-if-stdin-stdout-are-associated-with-terminal-or-pipe/
+
+# How to detect whether input is from keyboard, a file, or another process.
+# Useful for writing a script that can read from standard input, or prompt the
+# user for input if there is none.
+
+# https://gist.github.com/davejamesmiller/1966557
+if [[ -t 0 ]] # Script is called normally - Terminal input (keyboard) - interactive
+then
+    # eless foo
+    # eless foo | cat -
+    # echo "--> Input from terminal"
+    echo "terminal"
+    return 0
+else # Script is getting input from pipe or file - non-interactive
+    # echo bar | eless foo
+    # echo bar | eless foo | cat -
+    # echo "--> Input from PIPE/FILE"
+    echo "pipe"
+    return 1
+fi
+} # end stin_available
+
+function sdout_available(){
+# https://stackoverflow.com/a/911213/1219634
+if [[ -t 1 ]] # Output is going to the terminal
+then
+    # eless foo
+    # echo bar | eless foo
+    # echo "    Output to terminal -->"
+    echo "terminal"
+   return 0
+else # Output is going to a pipe, file?
+    # eless foo | cat -
+    # echo bar | eless foo | cat -
+    # echo "    Output to a PIPE -->"
+    echo "pipe"
+    return 1
+fi
+
+} # end stout_available
+function guake_available(){
+  local -i avaiable=0
+  if ( command -v guake >/dev/null 2>&1 ) ; then
+  {
+    avaiable=1
+  }
+  fi
+  echo ${avaiable}
+  return ${avaiable}
+}
+
+GUAKE_AVAILABLE=$(guake_available)
 SHOWOUTPUT=$(output_question)
 function _main(){
   local DEBUG=1
@@ -59,7 +115,15 @@ function _main(){
     #
     #
     local test_value=$(echo "${1%:*}")
-    echo "${test_value}"
+    if [[ "${test_value}" == *":xdebug://"* ]] ; then
+    {
+      echo "${test_value}" | cut -d":" -f1
+    }
+    else
+    {
+      echo "${test_value}"
+    }
+    fi
   } # end file_name
 
   function file_extension() {
@@ -135,45 +199,81 @@ function _main(){
           return 0
         }
         elif [[ "${EDITOR}" == *"nano" ]] || \
+          [[ "${EDITOR}" == *"/usr/bin/nano" ]] || \
+          [[ "${EDITOR}" == *"/usr/local/bin/nano" ]] || \
           [[ "${EDITOR}" == *"vim" ]] || \
+          [[ "${EDITOR}" == *"/usr/bin/vim" ]] || \
+          [[ "${EDITOR}" == *"/usr/local/bin/vim" ]] || \
           [[ "${EDITOR}" == *"emacs" ]] || \
-          [[ "${EDITOR}" == *"emacsnw" ]] ; then
-        {
-          [[ "${EDITOR}" == *"emacsnw" ]] && local EDITOR="emacs -nw"
-          (( SHOWOUTPUT )) && echo Running 5
-          echo "${EDITOR}" +"${clicked_linenumber}" "${clicked_name}"
-          guake -e "( ${EDITOR} +"${clicked_linenumber}" "${clicked_name}" )"&
-          
+          [[ "${EDITOR}" == *"/usr/bin/emacs" ]] || \
+          [[ "${EDITOR}" == *"/usr/local/bin/emacs" ]] || \
+          [[ "${EDITOR}" == *"emacsnw" ]] || \
+          [[ "${EDITOR}" == *"/usr/bin/emacsnw" ]] || \
+          [[ "${EDITOR}" == *"/usr/local/bin/emacsnw" ]] ; then
+        { [[ "${EDITOR}" == *"emacsnw" ]] && local EDITOR="emacs -nw"
+          ((SHOWOUTPUT)) && echo Running 5
+          ((SHOWOUTPUT)) && echo "line: ${clicked_linenumber}"&
+          ((SHOWOUTPUT)) && echo "name: ${clicked_name}" &
+          ((SHOWOUTPUT)) && echo "editor: guake -e ${EDITOR} +${clicked_linenumber} ${clicked_name}" &
+          ((   GUAKE_AVAILABLE )) &&  ((SHOWOUTPUT)) && echo "  GUAKE_AVAILABLE=${GUAKE_AVAILABLE}"
+          (( ! GUAKE_AVAILABLE )) &&  ((SHOWOUTPUT)) && echo "! GUAKE_AVAILABLE=${GUAKE_AVAILABLE}"
+          ((   GUAKE_AVAILABLE )) && guake -e "${EDITOR} +${clicked_linenumber} ${clicked_name}" &
+          (( ! GUAKE_AVAILABLE )) && open_command "${clicked_name}" &
+          (( ! GUAKE_AVAILABLE )) && subl -g "${clicked_name}:${clicked_linenumber}" &
           return 0
         }
         elif [[ "${EDITOR}" == *"brackets" ]] ; then
         {
           (( SHOWOUTPUT )) && echo Running 6
-          echo "${EDITOR}" "${clicked_name}"
-          ${EDITOR} "${clicked_name}"
+          echo guake -e "${EDITOR}"  "${clicked_name}" &
+          guake -e "${EDITOR}"  "${clicked_name}" &
+          return 0
+        }
+        elif [[ "${EDITOR}" == *"komodo" ]] ; then
+        {
+          (( SHOWOUTPUT )) && echo Running 6.1
+          echo guake -e ${EDITOR} "${clicked_name}" -l "${clicked_linenumber}" &
+          guake -e ${EDITOR} "${clicked_name}" -l "${clicked_linenumber}" &
+          return 0
+        }
+        elif [[ "${EDITOR}" == *"gvim" ]] ; then
+        {
+          (( SHOWOUTPUT )) && echo Running 6.2
+          echo guake -e ${EDITOR} --remote-tab +"${clicked_linenumber}" -l "${clicked_name}" &
+          guake -e ${EDITOR} --remote-tab +"${clicked_linenumber}" -l "${clicked_name}" &
           return 0
         }
         elif [[ "${EDITOR}" == *"webstorm" ]] || \
+          [[ "${EDITOR}" == *"/usr/local/bin/webstorm" ]] || \
           [[ "${EDITOR}" == *"charm" ]] || \
-          [[ "${EDITOR}" == *"phpstorm" ]] || \
-          [[ "${EDITOR}" == *"mine" ]] ; then
+          [[ "${EDITOR}" == *"/usr/local/bin/charm" ]] || \
+          [[ "${EDITOR}" == *"pstorm" ]] || \
+          [[ "${EDITOR}" == *"/usr/local/bin/pstorm" ]] || \
+          [[ "${EDITOR}" == *"mine" ]] || \
+          [[ "${EDITOR}" == *"/usr/local/bin/mine" ]] || \
+          [[ "${EDITOR}" == *"netbeans" ]]  \
+          ; then
         {
           (( SHOWOUTPUT )) && echo Running 7
-          echo "${EDITOR}" "${*}"
           # xdotool search --name website windowactivate  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
           # "${EDITOR}" "${*}"
-          guake -e "(${EDITOR} "${*}")"&
-          xdotool search --name "${EDITOR}"  windowactivate&  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
- 	  guake --hide&
-          # "${EDITOR}" "${*}"
+          echo guake -e ${EDITOR} "${*}"&
+          guake -e ${EDITOR} "${*}" &
+          echo xdotool search --name ${EDITOR}  windowactivate&  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
+          xdotool search --name ${EDITOR}  windowactivate&  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
+          echo guake --hide&
+          guake --hide&
           return 0
         }
         else
         {
           (( SHOWOUTPUT )) && echo NO EDITOR in list of guake_quick_open_file_opener here attemping anyways
-          (( SHOWOUTPUT )) && echo Running 7
+          (( SHOWOUTPUT )) && echo Running 77
           echo "${EDITOR}" "${*}"
-          ${EDITOR} "${*}"
+          guake -e "${EDITOR} "${*}""&
+          xdotool search --name "${EDITOR}"  windowactivate&  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
+          guake --hide&
+          # ${EDITOR} "${*}"
           return 0
         }
         fi
@@ -189,13 +289,13 @@ function _main(){
       (( SHOWOUTPUT )) && echo  EDITOR VAR not found
       if [[ "${*}" == *".rb"* ]] || [[ "${*}" == *"smart-workspace-backend"* ]] ; then
       {
-      	# echo mine  "${*}"
+        # echo mine  "${*}"
         echo code -g  \""${*}"\"
         guake --hide&
       } else {
-      	echo subl  -g "${*}"
+        echo subl  -g "${*}"
         guake --hide&
-      } 
+      }
       fi
       exit 0
       if ( command -v subl >/dev/null 2>&1 ); then
