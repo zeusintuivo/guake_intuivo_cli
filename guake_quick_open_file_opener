@@ -277,7 +277,7 @@ function _main(){
           {
             ((   GUAKE_AVAILABLE )) && ((SHOWOUTPUT)) && echo "editor: guake -e ${EDITOR} +${clicked_linenumber} ${clicked_name}" &
             ((   GUAKE_AVAILABLE )) && guake -e "${EDITOR} +${clicked_linenumber} ${clicked_name}" &
-            (( ! GUAKE_AVAILABLE )) && "${EDITOR}" +${clicked_linenumber} ${clicked_name}" &
+            (( ! GUAKE_AVAILABLE )) && "${EDITOR}" +"${clicked_linenumber} ${clicked_name}" &
             (( ! GUAKE_AVAILABLE )) && open_command "${clicked_name}:${clicked_linenumber}" &
           }
           fi
@@ -288,8 +288,8 @@ function _main(){
           (( SHOWOUTPUT )) && echo Running 6
           ((   GUAKE_AVAILABLE )) && echo guake -e "${EDITOR}"  "${clicked_name}" &
           ((   GUAKE_AVAILABLE )) && guake -e "${EDITOR}"  "${clicked_name}" &
-          (( ! GUAKE_AVAILABLE )) && echo "${EDITOR}"  "${clicked_name}" &
-          (( ! GUAKE_AVAILABLE )) &&  "${EDITOR}"  "${clicked_name}" &
+          (( ! GUAKE_AVAILABLE )) && echo "${EDITOR}  ${clicked_name}" &
+          (( ! GUAKE_AVAILABLE )) &&  ${EDITOR}  "${clicked_name}" &
           return 0
         }
         elif [[ "${EDITOR}" == *"komodo" ]] ; then
