@@ -350,10 +350,10 @@ function _main(){
         {
           (( SHOWOUTPUT )) && echo NO EDITOR in list of guake_quick_open_file_opener here attemping anyways
           (( SHOWOUTPUT )) && echo Running 77
-          ((   GUAKE_AVAILABLE )) && (( SHOWOUTPUT )) && echo guake -e "${EDITOR} ${clicked_linenumber}:${clicked_name}"&
-          ((   GUAKE_AVAILABLE )) && guake -e "${EDITOR} ${clicked_linenumber}:${clicked_name}"&
-          (( ! GUAKE_AVAILABLE )) && (( SHOWOUTPUT )) && echo "${EDITOR}" "${clicked_linenumber}:${clicked_name}"&
-          (( ! GUAKE_AVAILABLE )) && "${EDITOR}" "${clicked_linenumber}:${clicked_name}"&
+          ((   GUAKE_AVAILABLE )) && (( SHOWOUTPUT )) && echo guake -e "${EDITOR} ${clicked_name}:${clicked_linenumber}"&
+          ((   GUAKE_AVAILABLE )) && guake -e "${EDITOR} ${clicked_name}:${clicked_linenumber}"&
+          (( ! GUAKE_AVAILABLE )) && (( SHOWOUTPUT )) && echo "${EDITOR}" "${clicked_name}:${clicked_linenumber}"&
+          (( ! GUAKE_AVAILABLE )) && "${EDITOR}" "${clicked_name}:${clicked_linenumber}"&
           (( XDOTOOL_AVAILABLE )) && (( SHOWOUTPUT )) && echo xdotool search --name "${EDITOR}"  windowactivate&  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
           (( XDOTOOL_AVAILABLE )) && xdotool search --name "${EDITOR}"  windowactivate&  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
           guake --hide&
