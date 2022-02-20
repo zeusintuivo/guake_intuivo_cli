@@ -113,8 +113,44 @@ function _main(){
   local clicked_extension
   local clicked_name
   local clicked_linenumber
-  (( SHOWOUTPUT )) && echo "You cliked: ${*}"
-  (( SHOWOUTPUT )) && echo "Current pwd: $(pwd)"
+    # How to check if a variable is set in Bash? REF: https://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash if [ -z ${var+x} ]; then echo "var is unset"; else echo "var is set to '$var'"; fi
+    local -i ITERM=0
+    # ((   ITERM )) && [[ -f "${HOME}/.temp_keys" ]] && echo "source \"${HOME}/.temp_keys\""
+    # (( ! ITERM )) && [[ -f "${HOME}/.temp_keys" ]] && . "${HOME}/.temp_keys"
+    # ((   ITERM )) && [ -f .temp_keys ] && echo "source .temp_keys"
+    # (( ! ITERM )) && [ -f .temp_keys ] && . .temp_keys
+    if [ -z ${ITERM_PROFILE+x} ]; then ITERM=0; else ITERM=1; fi
+    if ( env | grep "ITERM"  &>/dev/null  ); then ITERM=1; else ITERM=0; fi
+    # if [[ "${SHELL}" == *"zsh" ]] ; then
+    # {
+    #   ((   ITERM )) && [[ -f "${HOME}/.zprofile" ]] && echo "source \"${HOME}/.zprofile\""
+    #   (( ! ITERM )) && [[ -f "${HOME}/.zprofile" ]] && . "${HOME}/.zprofile"
+    # }
+    # fi
+    # if [[ "${SHELL}" == *"bash" ]] ; then
+    # {
+    #   ((   ITERM )) && [[ -f "${HOME}/.bash_profile" ]] && echo "source \"${HOME}/.bash_profile\""
+    #   (( ! ITERM )) && [[ -f "${HOME}/.bash_profile" ]] && . "${HOME}/.bash_profile"
+    # }
+    # fi
+    # if [[ "${SHELL}" == *"sh" ]] && [[ "${SHELL}" != *"zsh" ]] && [[ "${SHELL}" == *"bash" ]]; then
+    # {
+    #   ((   ITERM )) && [[ -f "${HOME}/.profile" ]] && echo "source \"${HOME}/.profile\""
+    #   (( ! ITERM )) && [[ -f "${HOME}/.profile" ]] && . "${HOME}/.profile"
+    # }
+    # fi
+    # (( DEBUG )) && echo "echo ITERM_PROFILE:$ITERM_PROFILE"
+    # (( DEBUG )) && echo "echo HOME:$HOME"
+    # (( DEBUG )) && echo "echo ITERM:$ITERM"
+    # (( DEBUG )) && echo "echo EDITOR:$EDITOR"
+    # (( DEBUG )) && echo "echo LOADED:$LOADED"
+    # (( DEBUG )) && echo "echo which nano:$(which nano)"
+    # (( DEBUG )) && echo "echo env:\"$(env)\""
+
+  (( SHOWOUTPUT )) && ((   ITERM )) && echo "echo \"You cliked: ${*}\""
+  (( SHOWOUTPUT )) && (( ! ITERM )) && echo "You cliked: ${*}"
+  (( SHOWOUTPUT )) && ((   ITERM )) && echo "echo \"You cliked: ${*}\""
+  (( SHOWOUTPUT )) && (( ! ITERM )) && echo "Current pwd: $(pwd)"
   function file_name() {
     #
     # Outputs the file extension given a file name
@@ -193,15 +229,17 @@ function _main(){
     # -- args={"brackets", name}
     # -- args={"code", "-g", name..":"..lineno}
     # -- args={"code-insiders", "-g", name..":"..lineno}
-    (( SHOWOUTPUT )) && echo clicked_linenumber:$clicked_linenumber
+    (( SHOWOUTPUT )) && ((   ITERM )) && echo "echo clicked_linenumber:$clicked_linenumber"
+    (( SHOWOUTPUT )) && (( ! ITERM )) && echo clicked_linenumber:$clicked_linenumber
     (( SHOWOUTPUT )) && set +e
-    [ -f .temp_keys ] && . .temp_keys
     if [[  -n "${EDITOR}" ]] ; then
     {
-      (( SHOWOUTPUT )) && echo EDITOR defined
+      (( SHOWOUTPUT )) && ((   ITERM )) && echo "echo EDITOR defined:${EDITOR}"
+      (( SHOWOUTPUT )) && (( ! ITERM )) && echo "EDITOR defined:${EDITOR}"
       if ( command -v "${EDITOR}" >/dev/null 2>&1 ) || ([[ "${EDITOR}" == *"emacsnw" ]] && ( command -v emacs >/dev/null 2>&1 ) ); then
       {
-        (( SHOWOUTPUT )) && echo Command  "${EDITOR}" found
+        (( SHOWOUTPUT )) && ((   ITERM )) && echo "echo Command  \"${EDITOR}\" found"
+        (( SHOWOUTPUT )) && (( ! ITERM )) && echo Command  "${EDITOR}" found
         if [[ "${EDITOR}" == *"code-insiders" ]] || \
             [[ "${EDITOR}" == *"code" ]] ; then
         {
@@ -222,70 +260,106 @@ function _main(){
           [[ "${EDITOR}" == *"emacsnw" ]] || \
           [[ "${EDITOR}" == *"/usr/bin/emacsnw" ]] || \
           [[ "${EDITOR}" == *"/usr/local/bin/emacsnw" ]] ; then
-        { [[ "${EDITOR}" == *"emacsnw" ]] && local EDITOR="emacs -nw"
-          ((SHOWOUTPUT)) && echo Running 5
-          ((SHOWOUTPUT)) && echo "line: ${clicked_linenumber}"&
-          ((SHOWOUTPUT)) && echo "name: ${clicked_name}" &
-          ((SHOWOUTPUT)) && echo "editor: ${EDITOR}" &
-          ((   GUAKE_AVAILABLE )) &&  ((SHOWOUTPUT)) && echo "  GUAKE_AVAILABLE=${GUAKE_AVAILABLE}"
-          (( ! GUAKE_AVAILABLE )) &&  ((SHOWOUTPUT)) && echo "! GUAKE_AVAILABLE=${GUAKE_AVAILABLE}"
+        {
+          [[ "${EDITOR}" == *"emacsnw" ]] && local EDITOR="emacs -nw"
+          ((SHOWOUTPUT)) && ((   ITERM )) && echo "echo \"Running 5\""
+          ((SHOWOUTPUT)) && ((   ITERM )) && echo "echo \"line: ${clicked_linenumber}\""
+          ((SHOWOUTPUT)) && ((   ITERM )) && echo "echo \"name: ${clicked_name}\""
+          ((SHOWOUTPUT)) && ((   ITERM )) && echo "echo \"editor: ${EDITOR}\""
+          ((   GUAKE_AVAILABLE )) &&  ((SHOWOUTPUT)) && ((   ITERM )) && echo "echo \"  GUAKE_AVAILABLE=${GUAKE_AVAILABLE}\""
+          (( ! GUAKE_AVAILABLE )) &&  ((SHOWOUTPUT)) && ((   ITERM )) && echo "echo \"! GUAKE_AVAILABLE=${GUAKE_AVAILABLE}\""
+
+          ((SHOWOUTPUT)) && (( ! ITERM )) && echo Running 5
+          ((SHOWOUTPUT)) && (( ! ITERM )) && echo "line: ${clicked_linenumber}"&
+          ((SHOWOUTPUT)) && (( ! ITERM )) && echo "name: ${clicked_name}" &
+          ((SHOWOUTPUT)) && (( ! ITERM )) && echo "editor: ${EDITOR}" &
+          ((   GUAKE_AVAILABLE )) &&  ((SHOWOUTPUT)) && (( ! ITERM )) && echo "  GUAKE_AVAILABLE=${GUAKE_AVAILABLE}"
+          (( ! GUAKE_AVAILABLE )) &&  ((SHOWOUTPUT)) && (( ! ITERM )) && echo "! GUAKE_AVAILABLE=${GUAKE_AVAILABLE}"
           local -i _changed=0
           if [[ "${*}" == *"xdebug://"* ]] ; then
           {
             if ( command -v "pstorm" >/dev/null 2>&1 ) ; then
             {
+              ((SHOWOUTPUT)) && ((   ITERM )) && echo "echo \"Running 5.1\""
               EDITOR="pstorm"
               _changed=1
-              ((SHOWOUTPUT)) && echo "editor changed: ${EDITOR}"
+              ((SHOWOUTPUT)) && (( ! ITERM )) && echo "editor changed: ${EDITOR}"
             }
             elif ( command -v subl >/dev/null 2>&1 ) ; then
             {
+              ((SHOWOUTPUT)) && ((   ITERM )) && echo "echo \"Running 5.2\""
               EDITOR="subl"
               _changed=1
-              ((SHOWOUTPUT)) && echo "editor changed: ${EDITOR}"
+              ((SHOWOUTPUT)) && (( ! ITERM )) && echo "editor changed: ${EDITOR}"
             }
             elif ( command -v code >/dev/null 2>&1 ) ; then
             {
+              ((SHOWOUTPUT)) && ((   ITERM )) && echo "echo \"Running 5.3\""
               EDITOR="code -g"
               _changed=1
-              ((SHOWOUTPUT)) && echo "editor changed: ${EDITOR}"
+              ((SHOWOUTPUT)) &&  (( ! ITERM )) &&echo "editor changed: ${EDITOR}"
             }
             elif ( command -v code-insiders >/dev/null 2>&1 ) ; then
             {
+              ((SHOWOUTPUT)) && ((   ITERM )) && echo "echo \"Running 5.4\""
               EDITOR="code-insiders -g"
               _changed=1
-              ((SHOWOUTPUT)) && echo "editor changed: ${EDITOR}"
+              ((SHOWOUTPUT)) && (( ! ITERM )) && echo "editor changed: ${EDITOR}"
             }
             elif ( command -v gedit >/dev/null 2>&1 ) ; then
             {
+              ((SHOWOUTPUT)) && ((   ITERM )) && echo "echo \"Running 5.5\""
               EDITOR="gedit"
               _changed=1
-              ((SHOWOUTPUT)) && echo "editor changed: ${EDITOR}"
+              ((SHOWOUTPUT)) && (( ! ITERM )) && echo "editor changed: ${EDITOR}"
             }
             fi
           }
           fi
           if [[ ${_changed} -eq 1 ]] ; then
           {
-            ((SHOWOUTPUT)) && echo "5 editor: ${EDITOR} ${clicked_name}:${clicked_linenumber}" &
+            ((SHOWOUTPUT)) && ((   ITERM )) && echo "echo \"Running 5.6\""
+            ((SHOWOUTPUT)) && (( ! ITERM )) && echo "5 editor: ${EDITOR} ${clicked_name}:${clicked_linenumber}" &
             ((   GUAKE_AVAILABLE )) && "${EDITOR}" "${clicked_name}:${clicked_linenumber}" &
-            (( XDOTOOL_AVAILABLE )) && xdotool search --name "${EDITOR}"  windowactivate&  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
-            ((   GUAKE_AVAILABLE )) && guake --hide&
-            (( ! GUAKE_AVAILABLE )) && open_command "${clicked_name}:${clicked_linenumber}" &
+            (( XDOTOOL_AVAILABLE )) && (( ! ITERM )) && (( ! ITERM )) &&xdotool search --name "${EDITOR}"  windowactivate&  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
+            ((   GUAKE_AVAILABLE )) && (( ! ITERM )) && guake --hide&
+            (( ! GUAKE_AVAILABLE )) && (( ! ITERM )) && open_command "${clicked_name}:${clicked_linenumber}" &
+            return 0
           }
           else
           {
-            ((   GUAKE_AVAILABLE )) && ((SHOWOUTPUT)) && echo "5.1 editor: guake -e ${EDITOR} +${clicked_linenumber} ${clicked_name}" &
-            ((   GUAKE_AVAILABLE )) && guake -e "${EDITOR} +${clicked_linenumber} ${clicked_name}" &
-            (( ! GUAKE_AVAILABLE )) && "${EDITOR}" +"${clicked_linenumber} ${clicked_name}" &
-            (( ! GUAKE_AVAILABLE )) && open_command "${clicked_name}:${clicked_linenumber}" &
+            ((SHOWOUTPUT)) && ((   ITERM )) && echo "echo \"Running 5.7\""
+            ((   GUAKE_AVAILABLE )) && ((SHOWOUTPUT)) && (( ! ITERM )) && echo "5.1 editor: guake -e ${EDITOR} +${clicked_linenumber} ${clicked_name}" &
+            ((   GUAKE_AVAILABLE )) && (( ! ITERM )) && guake -e "${EDITOR} +${clicked_linenumber} ${clicked_name}" &
+            if (( ! GUAKE_AVAILABLE )) ; then
+            {
+              if (( ITERM )) ; then
+              {
+                ((SHOWOUTPUT)) && ((   ITERM )) && echo "echo \"Running 5.8\""
+                ((SHOWOUTPUT)) && ((   ITERM )) && echo "echo \"editor: ${EDITOR}\""
+                echo "echo \"${EDITOR} +${clicked_linenumber} \"${clicked_name}\" \"" &
+                ${EDITOR} +${clicked_linenumber} "${clicked_name}" &
+                # open_command "${clicked_name}:${clicked_linenumber}" &
+                return 0
+              }
+              else
+              {
+                ((SHOWOUTPUT)) && ((   ITERM )) && echo "echo \"Running 5.9\""
+                "${EDITOR}" +"${clicked_linenumber} ${clicked_name}" &
+                open_command "${clicked_name}:${clicked_linenumber}" &
+                return 0
+              }
+              fi
+            }
+            fi
           }
           fi
           return 0
         }
         elif [[ "${EDITOR}" == *"brackets" ]] ; then
         {
-          (( SHOWOUTPUT )) && echo Running 6
+          (( SHOWOUTPUT )) && ((   ITERM )) && echo "echo \"Running 6\""
+          (( SHOWOUTPUT )) && (( ! ITERM )) && echo Running 6
           ((   GUAKE_AVAILABLE )) && echo guake -e "${EDITOR} ${clicked_name}" &
           ((   GUAKE_AVAILABLE )) && guake -e "${EDITOR}"  "${clicked_name}" &
           (( ! GUAKE_AVAILABLE )) && echo "${EDITOR}  ${clicked_name}" &
@@ -356,7 +430,7 @@ function _main(){
           (( ! GUAKE_AVAILABLE )) && "${EDITOR}" "${clicked_name}:${clicked_linenumber}"&
           (( XDOTOOL_AVAILABLE )) && (( SHOWOUTPUT )) && echo xdotool search --name "${EDITOR}"  windowactivate&  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
           (( XDOTOOL_AVAILABLE )) && xdotool search --name "${EDITOR}"  windowactivate&  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
-          guake --hide&
+          ( command -v guake >/dev/null 2>&1 ) &&  guake --hide&
           # ${EDITOR} "${*}"
           return 0
         }
@@ -364,21 +438,41 @@ function _main(){
       }
       else
       {
-        (( SHOWOUTPUT )) && echo EDITOR "${EDITOR}" not responding to 'command -v' command
+        (( SHOWOUTPUT )) && (( ! ITERM )) && echo EDITOR "${EDITOR}" not responding to 'command -v' command
       }
       fi
     }
     else  # EDITOR VAR not found
     {
-      (( SHOWOUTPUT )) && echo  EDITOR VAR not found
+      (( SHOWOUTPUT )) && (( ! ITERM )) && echo  EDITOR VAR not found
       if [[ "${*}" == *".rb"* ]] || [[ "${*}" == *"smart-workspace-backend"* ]] ; then
       {
         # echo mine  "${*}"
         echo code -g  \""${*}"\"
         guake --hide&
-      } else {
-        echo subl  -g "${*}"
-        guake --hide&
+      }
+      else
+      {
+        ((   ITERM )) && [[ -f "${HOME}/.temp_keys" ]] && echo "source \"${HOME}/.temp_keys\""
+        (( ! ITERM )) && [[ -f "${HOME}/.temp_keys" ]] && . "${HOME}/.temp_keys"
+        ((   ITERM )) && [ -f .temp_keys ] && echo "source .temp_keys"
+        (( ! ITERM )) && [ -f .temp_keys ] && . .temp_keys
+        (( SHOWOUTPUT )) && ((   ITERM )) && echo "echo 'editor:$HOME'"
+        if [[ "${EDITOR2}" == *"pstorm" ]] ; then
+        {
+          # echo /usr/local/bin/nano +${clicked_linenumber} ${clicked_name}
+          echo ${EDITOR2}  --line ${clicked_linenumber}  "${clicked_name}" &
+        }
+        fi
+        echo subl -g "${clicked_name}:${clicked_linenumber}" &
+        if [[ "${EDITOR}" == *"nano" ]] ; then
+        {
+          # echo /usr/local/bin/nano +${clicked_linenumber} ${clicked_name}
+          echo ${EDITOR} +${clicked_linenumber} ${clicked_name} &
+        }
+        fi
+
+        ( command -v guake >/dev/null 2>&1 )&& (( ! ITERM ))  && guake --hide&
       }
       fi
       exit 0
@@ -414,17 +508,21 @@ function _main(){
     fi
   } # end default_editor
 
-  (( DEBUG )) && (( SHOWOUTPUT )) && echo "file_name:$(file_name "${*}")"
+  (( DEBUG )) && (( SHOWOUTPUT )) && ((   ITERM )) && echo "echo \"file_name:$(file_name "${*}")\""
+  (( DEBUG )) && (( SHOWOUTPUT )) && (( ! ITERM )) && echo "file_name:$(file_name "${*}")"
   clicked_name=$(file_name "${*}")
-  (( DEBUG )) && (( SHOWOUTPUT )) && echo "file_extension:$(file_extension "${*}")"
+  (( DEBUG )) && (( SHOWOUTPUT )) && ((   ITERM )) && echo "echo \"file_extension:$(file_extension "${*}")\""
+  (( DEBUG )) && (( SHOWOUTPUT )) && (( ! ITERM )) && echo "file_extension:$(file_extension "${*}")"
   clicked_extension=$(file_extension "${*}")
   if [[ "${clicked_extension}" == "${clicked_name}" ]] ; then
   {
     clicked_extension=""
   }
   fi
-  (( SHOWOUTPUT )) && echo clicked_extension:$clicked_extension
-  (( DEBUG )) && (( SHOWOUTPUT )) && echo "line_number:$(line_number "${*}")"
+  (( SHOWOUTPUT )) && ((   ITERM )) && echo "echo clicked_extension:$clicked_extension"
+  (( SHOWOUTPUT )) && (( ! ITERM )) && echo clicked_extension:$clicked_extension
+  (( DEBUG )) && (( SHOWOUTPUT )) && ((   ITERM )) && echo "echo \"line_number:$(line_number "${*}")\""
+  (( DEBUG )) && (( SHOWOUTPUT )) && (( ! ITERM )) && echo "line_number:$(line_number "${*}")"
   clicked_linenumber=$(line_number "${*}")
   # (( DEBUG )) && exit 0
 
