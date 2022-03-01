@@ -461,7 +461,16 @@ function _main(){
         if [[ "${EDITOR2}" == *"pstorm" ]] ; then
         {
           # echo /usr/local/bin/nano +${clicked_linenumber} ${clicked_name}
-          echo ${EDITOR2}  --line ${clicked_linenumber}  "${clicked_name}" &
+          if [ -z ${clicked_linenumber} ] ; then
+          {
+            echo ${EDITOR2}  "${clicked_name}" &
+          }
+          else
+          {
+            # NEW echo ${EDITOR2}  --line ${clicked_linenumber}  "${clicked_name}" &
+            echo ${EDITOR2}  "${clicked_name}:${clicked_linenumber}" &
+          }
+          fi
         }
         fi
         echo subl -g "${clicked_name}:${clicked_linenumber}" &
