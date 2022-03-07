@@ -6,17 +6,17 @@
 
 
 # DEBUG
-# echo "
-# Start
-# echo 0:$0
-# echo 1:$1
-# echo 2:$2
-# echo 3:$3
-# echo 4:$4
-# echo 5:$5
-# echo 6:$6
-# echo 7:$7
-# "  >> "${HOME}/open.log"
+echo "
+Start
+echo 0:$0
+echo 1:$1
+echo 2:$2
+echo 3:$3
+echo 4:$4
+echo 5:$5
+echo 6:$6
+echo 7:$7
+"  >> "${HOME}/iterm2_click_handler.log"
 this_script="${0}"
 file="${1}"
 line="${2}"
@@ -34,16 +34,20 @@ if [ -z ${working_folder} ] ; then
 fi
 
 # DEBUG
-# echo "
-# file="${file}"
-# line="${line}"
-# text_before_click="${text_before_click}"
-# text_after_click="${text_after_click}"
-# working_folder="${working_folder}"
-# "  >> "${HOME}/open.log"
+echo "
+file="${file}"
+line="${line}"
+text_before_click="${text_before_click}"
+text_after_click="${text_after_click}"
+working_folder="${working_folder}"
+"  >> "${HOME}/iterm2_click_handler.log"
 # /usr/local/bin/pstorm "${file}:${line}"
 # /usr/local/bin/nano +${line} "${file}"
 # /usr/local/bin/subl -g "${file}:${line}"
-"${HOME}/_/clis/guake_intuivo_cli/guake_quick_open_file_opener" "${file}:${line}" "run_command" "${working_folder}" "${text_before_click}" "${text_after_click}" >>"${HOME}/open.log"
+echo "
+Calling guake_quick_open_file_opener
+${HOME}/_/clis/guake_intuivo_cli/guake_quick_open_file_opener \"${file}:${line}\" \"run_command\" \"${working_folder}\""  >>"${HOME}/iterm2_click_handler.log"
+"${HOME}/_/clis/guake_intuivo_cli/guake_quick_open_file_opener" "${file}:${line}" "run_command" "${working_folder}" >>"${HOME}/iterm2_click_handler.log"
+# "${HOME}/_/clis/guake_intuivo_cli/guake_quick_open_file_opener" "${file}:${line}" "run_command" "${working_folder}" "${text_before_click}" "${text_after_click}" >>"${HOME}/iterm2_click_handler.log"
 
 exit 0
