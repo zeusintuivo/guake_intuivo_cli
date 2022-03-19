@@ -332,6 +332,7 @@ function _main(){
 #          {
             ((   GUAKE_AVAILABLE )) && ((SHOWOUTPUT)) && echo "7.1 editor: guake -e ${EDITOR} ${clicked_name}:${clicked_linenumber}" &
             ((   GUAKE_AVAILABLE )) && guake -e "${EDITOR} ${clicked_name}:${clicked_linenumber}" &
+            ((   GUAKE_AVAILABLE )) && "${EDITOR}" "${clicked_name}:${clicked_linenumber}" &
             (( ! GUAKE_AVAILABLE )) && "${EDITOR}" "${clicked_name}:${clicked_linenumber}" &
             (( ! GUAKE_AVAILABLE )) && open_command "${clicked_name}:${clicked_linenumber}" &
 #          }
