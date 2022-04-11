@@ -376,13 +376,16 @@ function _main(){
       {
         # echo mine  "${*}"
         echo code -g  \""${*}"\"
-        guake --hide&
-      } else {
+        ((   GUAKE_AVAILABLE )) && guake --hide&
+        return 0
+      }
+      else
+      {
         echo subl  -g "${*}"
-        guake --hide&
+        ((   GUAKE_AVAILABLE )) && guake --hide&
+        return 0
       }
       fi
-      exit 0
       if ( command -v subl >/dev/null 2>&1 ); then
       {
         (( SHOWOUTPUT )) && echo Running 10
