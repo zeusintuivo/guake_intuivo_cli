@@ -343,8 +343,8 @@ function _main(){
 #          (( ! GUAKE_AVAILABLE )) && ${EDITOR} "${clicked_linenumber}:${clicked_name}" &
           (( XDOTOOL_AVAILABLE )) && (( SHOWOUTPUT )) && echo xdotool search --name ${EDITOR}  windowactivate&  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
           (( XDOTOOL_AVAILABLE )) && xdotool search --name ${EDITOR}  windowactivate&  # Force Webstorm to Front Gnome - sudo dnf/apt install xdotool
-          ((   GUAKE_AVAILABLE )) && (( SHOWOUTPUT )) && echo guake --hide&
-          ((   GUAKE_AVAILABLE )) && guake --hide&
+#          ((   GUAKE_AVAILABLE )) && (( SHOWOUTPUT )) && echo guake --hide&
+#          ((   GUAKE_AVAILABLE )) && guake --hide&
           return 0
         }
         else
