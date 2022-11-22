@@ -3,7 +3,7 @@
 #
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
-# Suggesged to Place under Quick Open  PATTERN: /usr/local/bin/guake_quick_open_file_opener %(file_path)s:%(line_number)s
+# Suggested to Place under Quick Open  PATTERN: /usr/local/bin/guake_quick_open_file_opener %(file_path)s:%(line_number)s
 
 function open_command() {
     # emulate -L zsh
