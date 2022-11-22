@@ -380,7 +380,30 @@ function _main(){
         return 0
       }
       else
-      {
+      { 
+	echo EXECUTING subl
+	if [ -e /usr/bin/subl ] ; then
+	{
+	   echo /usr/bin/subl  -g "${*}" &
+	   /usr/bin/subl  -g "${*}" &
+           ((   GUAKE_AVAILABLE )) && guake --hide&
+           return 0
+	} 
+	elif [ -e /usr/local/bin/subl ] ; then
+        {
+           echo /usr/local/bin/subl  -g "${*}" &
+           /usr/local/bin/subl  -g "${*}" &
+           ((   GUAKE_AVAILABLE )) && guake --hide&
+           return 0
+        }
+        else
+	{
+  	  echo subl  -g "${*}" &
+	  subl  -g "${*}" &
+          ((   GUAKE_AVAILABLE )) && guake --hide&
+          return 0
+	}
+	fi
         echo subl  -g "${*}"
         ((   GUAKE_AVAILABLE )) && guake --hide&
         return 0
