@@ -23,6 +23,7 @@ line="${2}"
 text_before_click="${3}"
 text_after_click="${4}"
 working_folder="${5}"
+
 if [ -z ${working_folder} ] ; then
 {
   file="${1}"

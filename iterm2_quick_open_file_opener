@@ -816,11 +816,19 @@ function _main(){
   } # end try_to_guess_editor_from_project_dirs
 
   clicked_name=$(file_name "${*}")
+  if [[ "${clicked_name}" == *":"* ]] ; then 
+  {
+    # case 1 "/Users/administrator/_/clis/execute_command_intuivo_cli/struct_testing:2355 run_command  _if_not_contains()    ☠  OFFENDING COMMAND:     ☠  OFFENDING e x i t: 1     ☠  Offending message:     ☠  ERROR STACK TRACE: 9    /Users/administrator/_/clis/execute_command_intuivo_cli/struct_testing"
+    clicked_name="$(cut -d":" -f1 <<< "${clicked_name}")" 
+  }
+  fi
   (( DEBUG )) && (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} \"clicked_name:${clicked_name}\""
   (( DEBUG )) && (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} \"clicked_name:${clicked_name}\""
   if ( command -v paeth >/dev/null 2>&1 ) ; then
   {
+
     resolved_name=$(paeth "${clicked_name}")
+
     (( DEBUG )) && (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} \"resolved_name:${resolved_name}\""
     (( DEBUG )) && (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} \"resolved_name:${resolved_name}\""
   }
