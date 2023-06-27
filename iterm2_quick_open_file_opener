@@ -5,10 +5,21 @@
 #
 # Suggested to Place under Quick Open  PATTERN: /usr/local/bin/guake_quick_open_file_opener %(file_path)s:%(line_number)s
 # MacOS using ITerm2.app
+#
 # iTerm2 > Profiles > Adv -> Semantic History > Run Co-process:
 # /usr/bin/env bash /Users/user.name/_/clis/guake_intuivo_cli/guake_quick_open_file_opener \1:\2 run_coprocess \3 \4 \5
+#
 # iTerm2 > Profiles > Adv -> Semantic History > Run Command:
 # /usr/bin/env bash /Users/user.name/_/clis/guake_intuivo_cli/guake_quick_open_file_opener \1:\2 run_command \3 \4 \5
+#
+# MacOS using ITerm2.app
+#
+# iTerm2 > Profiles > Adv -> Semantic History > Run Co-process:
+# /usr/bin/env bash /Users/user.name/_/clis/guake_intuivo_cli/iterm2_quick_open_file_opener \1:\2 run_coprocess \3 \4 \5
+#
+# iTerm2 > Profiles > Adv -> Semantic History > Run Command:
+# /usr/bin/env bash /Users/user.name/_/clis/guake_intuivo_cli/iterm2_quick_open_file_opener \1:\2 run_command \3 \4 \5
+
 # Linux Using Guake
 #
 # How to show line number when executing bash script REF: https://stackoverflow.com/questions/17804007/how-to-show-line-number-when-executing-bash-script
@@ -136,7 +147,15 @@ function _main(){
     # (( ! ITERM )) && [ -f .temp_keys ] && . .temp_keys
     if [ -z ${ITERM_PROFILE+x} ]; then ITERM=0; else ITERM=1; fi
     (( ! ITERM )) && if ( env | grep "ITERM"  &>/dev/null  ); then ITERM=1; else ITERM=0; fi
-    (( ! ITERM )) && if ( env | grep "__CFBundleIdentifier"  &>/dev/null  ); then ITERM=1; else ITERM=0; fi
+    if (( ! ITERM )) &&  ( env | grep "__CFBundleIdentifier"  &>/dev/null  ); then 
+    {
+      ITERM=1; 
+    }  
+    else
+    {
+      ITERM=0;       
+    } 
+    fi
 
     # if [[ "${SHELL}" == *"zsh" ]] ; then
     # {
@@ -184,6 +203,8 @@ function _main(){
     # After EDITOR from $HOME/.temp_keys
     # After EDITOR var defined
     local _saved_editor="${EDITOR}";
+  (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} \"WORKING_FOLDER: ${WORKING_FOLDER}\""
+  (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} \"WORKING_FOLDER: ${WORKING_FOLDER}\""
     if [[  -z ${EDITOR} ]] ; then
     {
       (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO}  EDITOR VAR not found in ${SHELL} environment"
@@ -374,7 +395,48 @@ function _main(){
   function run_editor_based_on_knowledge() {
       (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} EDITOR defined:${EDITOR}"
       (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} \"EDITOR defined:${EDITOR}\""
-      if ( command -v "${EDITOR}" >/dev/null 2>&1 ) || ([[ "${EDITOR}" == *"emacsnw" ]] && ( command -v emacs >/dev/null 2>&1 ) ); then
+      if ( command -v "${EDITOR}" >/dev/null 2>&1 ) ; then
+      {
+        (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} Command  \"${EDITOR}\" found"
+        (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} Command  \"${EDITOR}\" found"
+        if [[ "${EDITOR}" == *"code-insiders" ]] || \
+           [[ "${EDITOR}" == *"code" ]] ; then
+        {
+          (( SHOW_OUTPUT )) && echo Running 4022
+          echo "${EDITOR}" -g "${clicked_name}:${clicked_line_number}" &
+          ${EDITOR} -g "${clicked_name}:${clicked_line_number}" &
+          return 0
+        }
+        fi
+        (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} editor logic not programmed:  \"${EDITOR}\" "
+        (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} editor logic not programmed:  \"${EDITOR}\" "
+        return 1
+      }
+      else 
+      {
+        (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} Command  \"${EDITOR}\" NOT found"
+        (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} Command  \"${EDITOR}\" NOT found"
+        local PATCHED_EDITOR="/usr/local/bin/${EDITOR}"
+        if ( command -v "${PATCHED_EDITOR}" >/dev/null 2>&1 ) ; then
+        {
+          (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} PATCHED_EDITOR Command  \"${PATCHED_EDITOR}\" found"
+          (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} PATCHED_EDITOR Command  \"${PATCHED_EDITOR}\" found"
+          (( SHOW_OUTPUT )) && echo Running 4023
+          echo "${PATCHED_EDITOR}" -g "${clicked_name}:${clicked_line_number}" &
+          ${PATCHED_EDITOR} -g "${clicked_name}:${clicked_line_number}" &
+          return 0
+        }
+        else
+        {
+          (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} PATCHED_EDITOR Command  \"${PATCHED_EDITOR}\" NOT found"
+          (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} PATCHED_EDITOR Command  \"${PATCHED_EDITOR}\" NOT found"
+
+        } 
+        fi
+        return 1
+      }
+      fi
+      if ( command -v "${EDITOR}" >/dev/null 2>&1 ) ; then
       {
         (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} Command  \"${EDITOR}\" found"
         (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} Command  \"${EDITOR}\" found"
@@ -647,6 +709,7 @@ function _main(){
       fi
   } # end run_editor_based_on_knowledge
 
+
   function default_editor() {
     #  args={"vim", "+"..lineno, name}
     # -- args={"nano", "+"..lineno, name}
@@ -665,12 +728,30 @@ function _main(){
     (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} WORKING_FOLDER:$WORKING_FOLDER"
     (( SHOW_OUTPUT )) && set +e
 
+    ((   ITERM )) && [[ -f "${WORKING_FOLDER}/.temp_keys" ]] && echo "source \"${WORKING_FOLDER}/.temp_keys\""
+    (( ! ITERM )) && [[ -f "${WORKING_FOLDER}/.temp_keys" ]] && . "${WORKING_FOLDER}/.temp_keys"
+    # echo "echo $0:${LINENO} ITERM:$ITERM"
+    # echo "$0:${LINENO} ITERM:$ITERM"
+    if ((   ITERM == 1 )) && [[ -f "${WORKING_FOLDER}/.temp_keys" ]] ; then
+    {
+      source "${WORKING_FOLDER}/.temp_keys"
+    }
+    fi
+    # source "${WORKING_FOLDER}/.temp_keys"
+    # env
+    (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} EDITOR:$EDITOR"
+    (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} EDITOR:$EDITOR"
+    ((   ITERM )) && [ -f .temp_keys ] && echo "source .temp_keys"
+    (( ! ITERM )) && [ -f .temp_keys ] && . .temp_keys
+    (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} EDITOR:$EDITOR"
+    (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} EDITOR:$EDITOR"
+
     if [[  -n "${EDITOR}" ]] ; then
-      run_editor_based_on_knowledge
+      run_editor_based_on_knowledge 2>&1
     else  # EDITOR VAR not found in bash environment
       # decide_editor
       EDITOR="/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl"
-      run_editor_based_on_knowledge
+      run_editor_based_on_knowledge 2>&1
     fi
   } # end default_editor
 
