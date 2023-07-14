@@ -3,12 +3,12 @@
 #
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
-# Suggested to Place under Quick Open  PATTERN: /usr/local/bin/guake_quick_open_file_opener %(file_path)s:%(line_number)s
+# Suggested to Place under Quick Open  PATTERN: /usr/local/bin/iterm2_quick_open_file_opener %(file_path)s:%(line_number)s
 # MacOS using ITerm2.app
 # iTerm2 > Profiles > Adv -> Semantic History > Run Co-process:
-# /usr/bin/env bash /Users/user.name/_/clis/guake_intuivo_cli/guake_quick_open_file_opener \1:\2 run_coprocess \3 \4 \5
+# /usr/bin/env bash /Users/user.name/_/clis/guake_intuivo_cli/iterm2_quick_open_file_opener \1:\2 run_coprocess \3 \4 \5
 # iTerm2 > Profiles > Adv -> Semantic History > Run Command:
-# /usr/bin/env bash /Users/user.name/_/clis/guake_intuivo_cli/guake_quick_open_file_opener \1:\2 run_command \3 \4 \5
+# /usr/bin/env bash /Users/user.name/_/clis/guake_intuivo_cli/iterm2_quick_open_file_opener \1:\2 run_command \3 \4 \5
 # Linux Using Guake
 #
 # How to show line number when executing bash script REF: https://stackoverflow.com/questions/17804007/how-to-show-line-number-when-executing-bash-script
@@ -122,12 +122,12 @@ SHOW_OUTPUT=$(output_question)
 function _main(){
   local -i ITERM_RUN_COMMAND=0
   local -i DEBUG=1
-  local WORKING_FOLDER
-  WORKING_FOLDER=$(pwd)  # in MacOs Iterm defaults to /
   local clicked_extension
   local clicked_name
   local resolved_name
   local clicked_line_number
+  local WORKING_FOLDER
+  WORKING_FOLDER=$(pwd)  # in MacOs Iterm defaults to /
     # How to check if a variable is set in Bash? REF: https://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash if [ -z ${var+x} ]; then echo "var is unset"; else echo "var is set to '$var'"; fi
     local -i ITERM=0
     # ((   ITERM )) && [[ -f "${HOME}/.temp_keys" ]] && echo "source \"${HOME}/.temp_keys\""
@@ -328,6 +328,7 @@ function _main(){
           fi
         }
         fi
+        echo "echo \"${EDITOR2}\""
         echo subl -g "${clicked_name}:${clicked_line_number}" &
         if [[ "${EDITOR}" == *"nano" ]] ; then
         {
@@ -544,6 +545,8 @@ function _main(){
           [[ "${EDITOR}" == *"/usr/local/bin/webstorm" ]] || \
           [[ "${EDITOR}" == *"charm" ]] || \
           [[ "${EDITOR}" == *"/usr/local/bin/charm" ]] || \
+          [[ "${EDITOR}" == *"studio" ]] || \
+          [[ "${EDITOR}" == *"/usr/local/bin/studio" ]] || \
           [[ "${EDITOR}" == *"pstorm" ]] || \
           [[ "${EDITOR}" == *"/usr/local/bin/pstorm" ]] || \
           [[ "${EDITOR}" == *"mine" ]] || \
@@ -626,7 +629,7 @@ function _main(){
         }
         else
         {
-          (( SHOW_OUTPUT )) && echo NO EDITOR in list of guake_quick_open_file_opener here attempting anyways
+          (( SHOW_OUTPUT )) && echo NO EDITOR in list of iterm2_quick_open_file_opener here attempting anyways
           (( SHOW_OUTPUT )) && echo Running 77
           ((   GUAKE_AVAILABLE )) && (( SHOW_OUTPUT )) && echo guake -e "${EDITOR} ${clicked_name}:${clicked_line_number}"&
           ((   GUAKE_AVAILABLE )) && guake -e "${EDITOR} ${clicked_name}:${clicked_line_number}"&
