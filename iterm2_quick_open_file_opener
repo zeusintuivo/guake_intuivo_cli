@@ -408,6 +408,13 @@ function _main(){
           ${EDITOR} -g "${clicked_name}:${clicked_line_number}" &
           return 0
         }
+        elif [[ "${EDITOR}" == *"subl" ]]; then
+        {
+          (( SHOW_OUTPUT )) && echo Running 4032
+          echo "${EDITOR}"  "${clicked_name}:${clicked_line_number} &"
+          "${EDITOR}"  "${clicked_name}:${clicked_line_number}" &
+          return 0
+        }
         fi
         (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} editor logic not programmed:  \"${EDITOR}\" "
         (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} editor logic not programmed:  \"${EDITOR}\" "
