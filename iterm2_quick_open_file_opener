@@ -408,7 +408,7 @@ function _main(){
           ${EDITOR} -g "${clicked_name}:${clicked_line_number}" &
           return 0
         }
-        elif [[ "${EDITOR}" == *"subl" ]]; then
+        elif [[ "${EDITOR}" == *"subl" ]] ; then
         {
           (( SHOW_OUTPUT )) && echo Running 4032
           echo "${EDITOR}"  "${clicked_name}:${clicked_line_number} &"
@@ -429,9 +429,25 @@ function _main(){
         {
           (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} PATCHED_EDITOR Command  \"${PATCHED_EDITOR}\" found"
           (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} PATCHED_EDITOR Command  \"${PATCHED_EDITOR}\" found"
-          (( SHOW_OUTPUT )) && echo Running 4023
-          echo "${PATCHED_EDITOR}" -g "${clicked_name}:${clicked_line_number}" &
-          ${PATCHED_EDITOR} -g "${clicked_name}:${clicked_line_number}" &
+          (( SHOW_OUTPUT )) && echo Running 4077
+          if [[ "${EDITOR}" == *"subl" ]] ; then
+          {
+            (( SHOW_OUTPUT )) && echo Running 4077-1
+            echo "${PATCHED_EDITOR}" -g "${clicked_name}:${clicked_line_number}" &
+            ${PATCHED_EDITOR} -g "${clicked_name}:${clicked_line_number}" &
+            return 0
+          }
+          elif [[ "${EDITOR}" == *"mine" ]] ; then
+          {
+            (( SHOW_OUTPUT )) && echo Running 4077-2
+            echo "${PATCHED_EDITOR}" --line ${clicked_line_number} "${clicked_name}" &
+            ${PATCHED_EDITOR}  --line ${clicked_line_number} "${clicked_name}" &
+            return 0
+          }
+          fi
+          (( SHOW_OUTPUT )) && echo Running 4090 else not found  custom but run it either way
+          echo "${PATCHED_EDITOR}" "${clicked_name}:${clicked_line_number}" &
+          ${PATCHED_EDITOR} "${clicked_name}:${clicked_line_number}" &
           return 0
         }
         else
@@ -719,6 +735,75 @@ function _main(){
       fi
   } # end run_editor_based_on_knowledge
 
+  function ._attempt_to_find_temp_keys_cd_dot_dot() {
+    local _looking_folder="${1:-}"
+    local _cwd="$(pwd)"
+
+    (( SHOW_OUTPUT )) && set +e
+
+    if [[ ! -e "${_looking_folder}" ]] ; then
+    {
+      (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} Could not access _looking_folder:$_looking_folder"
+      (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} Could not access _looking_folder:$_looking_folder"
+      return 0
+    }
+    fi
+    local _curr_cd="${_looking_folder}"
+    local -i _found=0
+    local -i _no_more=0
+    local -i _counter=0
+    while [ ${_found} -eq 0 ] && [ ${_no_more} -eq 0 ] && [ ${_counter} -lt 500 ] ; do
+    {
+      cd  "${_curr_cd}"
+      (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} .temp_keys in _curr_cd:$_curr_cd"
+      (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} .temp_keys in _curr_cd:$_curr_cd"
+
+      if [[ ! -e "${_curr_cd}/.temp_keys" ]] ; then 
+      {
+        if [[ "${_curr_cd}" == '/' ]] ; then
+        {
+          _no_more=1
+        } 
+        fi
+        cd ..
+        _curr_cd="$(pwd)"
+        _counter=$(( _counter+1 ))
+        continue
+      }
+      fi
+      ((   ITERM )) && [[ -f "${_curr_cd}/.temp_keys" ]] && echo "source \"${_curr_cd}/.temp_keys\""
+      (( ! ITERM )) && [[ -f "${_curr_cd}/.temp_keys" ]] && . "${_curr_cd}/.temp_keys"
+      # echo "echo $0:${LINENO} ITERM:$ITERM"
+      # echo "$0:${LINENO} ITERM:$ITERM"
+      if ((   ITERM == 1 )) && [[ -f "${_curr_cd}/.temp_keys" ]] ; then
+      {
+        source "${_curr_cd}/.temp_keys"
+      }
+      fi
+      # source "${_curr_cd}/.temp_keys"
+      # env
+      (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} EDITOR:$EDITOR"
+      (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} EDITOR:$EDITOR"
+      ((   ITERM )) && [ -f .temp_keys ] && echo "source .temp_keys"
+      (( ! ITERM )) && [ -f .temp_keys ] && . .temp_keys
+      if [[ "${_curr_cd}" == '/' ]] ; then
+      {
+        _no_more=1
+      } 
+      fi
+      if [[ -n "${EDITOR}" ]] ; then
+      {
+        (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} EDITOR:$EDITOR Found in:$_curr_cd"
+        (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} EDITOR:$EDITOR Found in:$_curr_cd"
+        _no_more=1
+      }
+      fi
+      _counter=$(( _counter+1 ))
+    }
+    done
+    cd "${_looking_folder}"
+  
+  } # end ._attempt_to_find_temp_keys_cd_dot_dot  
 
   function default_editor() {
     #  args={"vim", "+"..lineno, name}
@@ -728,7 +813,7 @@ function _main(){
     # -- args={"webstorm", name..":"..lineno}
     # -- args={"charm", name..":"..lineno}
     # -- args={"subl", name..":"..lineno}
-    # -- args={"brackets", name}
+    # -- args={"brackets", name} 
     # -- args={"code", "-g", name..":"..lineno}
     # -- args={"code-insiders", "-g", name..":"..lineno}
 
@@ -736,23 +821,12 @@ function _main(){
     (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} clicked_line_number:$clicked_line_number"
     (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} WORKING_FOLDER:$WORKING_FOLDER"
     (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} WORKING_FOLDER:$WORKING_FOLDER"
-    (( SHOW_OUTPUT )) && set +e
 
-    ((   ITERM )) && [[ -f "${WORKING_FOLDER}/.temp_keys" ]] && echo "source \"${WORKING_FOLDER}/.temp_keys\""
-    (( ! ITERM )) && [[ -f "${WORKING_FOLDER}/.temp_keys" ]] && . "${WORKING_FOLDER}/.temp_keys"
-    # echo "echo $0:${LINENO} ITERM:$ITERM"
-    # echo "$0:${LINENO} ITERM:$ITERM"
-    if ((   ITERM == 1 )) && [[ -f "${WORKING_FOLDER}/.temp_keys" ]] ; then
-    {
-      source "${WORKING_FOLDER}/.temp_keys"
-    }
-    fi
-    # source "${WORKING_FOLDER}/.temp_keys"
-    # env
-    (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} EDITOR:$EDITOR"
-    (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} EDITOR:$EDITOR"
-    ((   ITERM )) && [ -f .temp_keys ] && echo "source .temp_keys"
-    (( ! ITERM )) && [ -f .temp_keys ] && . .temp_keys
+
+    ._attempt_to_find_temp_keys_cd_dot_dot "${WORKING_FOLDER}"
+
+
+
     (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} EDITOR:$EDITOR"
     (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} EDITOR:$EDITOR"
 
