@@ -1003,22 +1003,22 @@ function _main(){
   (( DEBUG )) && (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} \"clicked_extension:${clicked_extension}\""
   if [[ "${clicked_extension}" == "${clicked_name}" ]] ; then
   {
-    clicked_extension=""
+    clicked_extension=''
   }
   fi
   (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} clicked_extension:$clicked_extension"
   (( SHOW_OUTPUT )) && (( ! ITERM )) && echo $0:${LINENO} clicked_extension:$clicked_extension
-  local test_line_number=""
+  local test_line_number=''
   test_line_number="$(cut -d":" -f2 <<< "${*}")"
   (( DEBUG )) && (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} \"test_line_number test:${test_line_number}\""
 
   clicked_line_number=$(line_number "${test_line_number}")
   (( DEBUG )) && (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} \"line_number found:${clicked_line_number}\""
-  (( DEBUG )) && (( SHOW_OUTPUT )) && (( ! ITERM )) && echo $0:${LINENO} "line_number found:${clicked_line_number}"
+  (( DEBUG )) && (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} line_number found:${clicked_line_number}"
 
 
-  local test_working=""
-  test_working="$(cut -d" " -f3 <<< "${*}")"
+  local test_working=''
+  test_working="$(cut -d\  -f3 <<< "${*}")"
   (( DEBUG )) && (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} \"test_working:${test_working}\""
   (( DEBUG )) && (( SHOW_OUTPUT )) && (( ! ITERM )) && echo $0:${LINENO} "test_working:${test_working}"
   if [[ -n "${test_working}" ]] ; then
