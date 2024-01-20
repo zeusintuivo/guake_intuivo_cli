@@ -147,14 +147,14 @@ function _main(){
     # (( ! ITERM )) && [ -f .temp_keys ] && . .temp_keys
     if [ -z ${ITERM_PROFILE+x} ]; then ITERM=0; else ITERM=1; fi
     (( ! ITERM )) && if ( env | grep "ITERM"  &>/dev/null  ); then ITERM=1; else ITERM=0; fi
-    if (( ! ITERM )) &&  ( env | grep "__CFBundleIdentifier"  &>/dev/null  ); then 
+    if (( ! ITERM )) &&  ( env | grep "__CFBundleIdentifier"  &>/dev/null  ); then
     {
-      ITERM=1; 
-    }  
+      ITERM=1;
+    }
     else
     {
-      ITERM=0;       
-    } 
+      ITERM=0;
+    }
     fi
 
     # if [[ "${SHELL}" == *"zsh" ]] ; then
@@ -415,12 +415,19 @@ function _main(){
           "${EDITOR}"  "${clicked_name}:${clicked_line_number}" &
           return 0
         }
+        elif [[ "${EDITOR}" == *"nano" ]] ; then
+        {
+          (( SHOW_OUTPUT )) && echo Running 4033
+          echo "${EDITOR}" +${clicked_line_number} "${clicked_name} &"
+          "${EDITOR}" +${clicked_line_number} "${clicked_name} &"
+          return 0
+        }
         fi
         (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} editor logic not programmed:  \"${EDITOR}\" "
         (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} editor logic not programmed:  \"${EDITOR}\" "
         return 1
       }
-      else 
+      else
       {
         (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} Command  \"${EDITOR}\" NOT found"
         (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} Command  \"${EDITOR}\" NOT found"
@@ -444,6 +451,20 @@ function _main(){
             ${PATCHED_EDITOR}  --line ${clicked_line_number} "${clicked_name}" &
             return 0
           }
+          elif [[ "${EDITOR}" == *"code" ]] ; then
+          {
+            (( SHOW_OUTPUT )) && echo Running 4077-3
+            echo "${PATCHED_EDITOR}"  -g "${clicked_name}:${clicked_line_number}" &
+            ${PATCHED_EDITOR}  -g "${clicked_name}:${clicked_line_number}" &
+            return 0
+          }
+          elif [[ "${EDITOR}" == *"insiders" ]] ; then
+          {
+            (( SHOW_OUTPUT )) && echo Running 4077-4
+            echo "${PATCHED_EDITOR}"  -g "${clicked_name}:${clicked_line_number}" &
+            ${PATCHED_EDITOR}  -g "${clicked_name}:${clicked_line_number}" &
+            return 0
+          }
           fi
           (( SHOW_OUTPUT )) && echo Running 4090 else not found  custom but run it either way
           echo "${PATCHED_EDITOR}" "${clicked_name}:${clicked_line_number}" &
@@ -455,7 +476,7 @@ function _main(){
           (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} PATCHED_EDITOR Command  \"${PATCHED_EDITOR}\" NOT found"
           (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} PATCHED_EDITOR Command  \"${PATCHED_EDITOR}\" NOT found"
 
-        } 
+        }
         fi
         return 1
       }
@@ -758,12 +779,12 @@ function _main(){
       (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} .temp_keys in _curr_cd:$_curr_cd"
       (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} .temp_keys in _curr_cd:$_curr_cd"
 
-      if [[ ! -e "${_curr_cd}/.temp_keys" ]] ; then 
+      if [[ ! -e "${_curr_cd}/.temp_keys" ]] ; then
       {
         if [[ "${_curr_cd}" == '/' ]] ; then
         {
           _no_more=1
-        } 
+        }
         fi
         cd ..
         _curr_cd="$(pwd)"
@@ -789,7 +810,7 @@ function _main(){
       if [[ "${_curr_cd}" == '/' ]] ; then
       {
         _no_more=1
-      } 
+      }
       fi
       if [[ -n "${EDITOR}" ]] ; then
       {
@@ -802,8 +823,8 @@ function _main(){
     }
     done
     cd "${_looking_folder}"
-  
-  } # end ._attempt_to_find_temp_keys_cd_dot_dot  
+
+  } # end ._attempt_to_find_temp_keys_cd_dot_dot
 
   function default_editor() {
     #  args={"vim", "+"..lineno, name}
@@ -813,7 +834,7 @@ function _main(){
     # -- args={"webstorm", name..":"..lineno}
     # -- args={"charm", name..":"..lineno}
     # -- args={"subl", name..":"..lineno}
-    # -- args={"brackets", name} 
+    # -- args={"brackets", name}
     # -- args={"code", "-g", name..":"..lineno}
     # -- args={"code-insiders", "-g", name..":"..lineno}
 
@@ -981,10 +1002,10 @@ function _main(){
   } # end try_to_guess_editor_from_project_dirs
 
   clicked_name=$(file_name "${*}")
-  if [[ "${clicked_name}" == *":"* ]] ; then 
+  if [[ "${clicked_name}" == *":"* ]] ; then
   {
     # case 1 "/Users/administrator/_/clis/execute_command_intuivo_cli/struct_testing:2355 run_command  _if_not_contains()    ☠  OFFENDING COMMAND:     ☠  OFFENDING e x i t: 1     ☠  Offending message:     ☠  ERROR STACK TRACE: 9    /Users/administrator/_/clis/execute_command_intuivo_cli/struct_testing"
-    clicked_name="$(cut -d":" -f1 <<< "${clicked_name}")" 
+    clicked_name="$(cut -d":" -f1 <<< "${clicked_name}")"
   }
   fi
   (( DEBUG )) && (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} \"clicked_name:${clicked_name}\""
