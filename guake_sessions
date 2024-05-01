@@ -75,6 +75,7 @@ function load_tabs() {
   local -i TERMINAL_ID_=0
   local -i SESSION_ID_=0
   local TERMINALS_=""
+	local LAST_UUID_ID_=""
   local -i DEBUG
   DEBUG=0
   local -i LIMIT_COUNTER
@@ -125,19 +126,21 @@ function load_tabs() {
   _counter=0
   local -i _alt_counter
   _alt_counter=1
-	# Get and array or list of sessions
-  local _current_sessions="$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count | sed 's/,/\n/g' | sort -n)"
-  local _current_sessions=""
-	# Get and array or list of sessions, expeted return "0,1,2,3"
+	# Get and array or list of sessions, expected number return: 1
+	local -i _total_sessions=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)
+  # local _current_sessions=""
+	# Get and array or list of sessions, expeted return:  "0,1,2,3"
   # local _current_sessions="$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.sessionIdList | sed 's/,/\n/g' | sort -n)"
   local -i _num=0
-  while read -r _num ; do
+  while [ ${_counter} -lt ${_total_sessions} ] ; do
   {
-    [[ -z "${_num}" ]] && continue
     (( _counter++ ))
     (( _alt_counter++ ))
   }
-  done <<< "${_current_sessions}"
+  done
+	echo "DEBUG     _counter:${_counter}"
+	echo "DEBUG _alt_counter:${_alt_counter}"
+	# exit 0
   local _session_start_type _one _title _path _path2 _run _run2 _split SESSION_ID_ TERMINAL_ID_
 	local _split3  _path3  _run3
   local _yakuake_path_and_run _yakuake_set_title
@@ -153,9 +156,28 @@ function load_tabs() {
         (( DEBUG )) && pront " +-- Change split Terminal:${_counter} Splt?:${_split}"
         {
           # (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}")
-					(( DEBUG )) || TERMINAL_ID_=$(guake  --split-vertical)
+					# (( DEBUG )) || TERMINAL_ID_=$(guake  --split-vertical)
           # (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """ls""" guake -r "test" --split-vertical)
           # (( DEBUG )) || TERMINAL_ID_=$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.splitTerminalLeftRight "$TERMINAL_ID_")
+					(( DEBUG )) || TERMINAL_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.v_split_current_terminal 50)
+				  (( DEBUG )) || TOTAL_TERMINAL_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_terminals_count)
+				  (( DEBUG )) || SESSION_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)	
+				  (( DEBUG )) || TOTAL_TABS_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)	
+					(( DEBUG )) || LAST_UUID_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_uuidtab)
+					(( DEBUG )) || TERMINAL_NUMBER_INSIDE_TAB_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_terminal)
+					(( DEBUG )) || LAST_TAB_LABEL_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_tablabel)
+					(( DEBUG )) || TERMINALS_COUNT_INSIDE_TAB_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_term_count_for_current_page)
+					local i _counting=0
+					local _numbers_with_commas="0"
+					while [ ${_counting} -lt ${TERMINALS_COUNT_INSIDE_TAB_} ] ; do
+          {
+            _numbers_with_commas="${_numbers_with_commas},${_counting}"
+            (( _counting++ ))
+          }
+          done
+					TERMINALS_="${_numbers_with_commas}"
+          (( DEBUG )) || LAST_TERMINAL_IN_TAB_=$(( TERMINALS_COUNT_INSIDE_TAB_  - 1 ))
+					qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.select_terminal ${LAST_TERMINAL_IN_TAB_}
           wait
         }
         wait
@@ -166,8 +188,27 @@ function load_tabs() {
         (( DEBUG )) && pront " +-- Change split Terminal:${_counter} Splt?:${_split}"
         {
           # (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}")
-					(( DEBUG )) || TERMINAL_ID_=$(guake  --split-vertical)
+					# (( DEBUG )) || TERMINAL_ID_=$(guake  --split-vertical)
           # (( DEBUG )) || TERMINAL_ID_=$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.splitTerminalLeftRight "$TERMINAL_ID_")
+ 					(( DEBUG )) || TERMINAL_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.v_split_current_terminal 50)
+				  (( DEBUG )) || TOTAL_TERMINAL_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_terminals_count)
+				  (( DEBUG )) || SESSION_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)	
+				  (( DEBUG )) || TOTAL_TABS_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)	
+					(( DEBUG )) || LAST_UUID_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_uuidtab)
+					(( DEBUG )) || TERMINAL_NUMBER_INSIDE_TAB_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_terminal)
+					(( DEBUG )) || LAST_TAB_LABEL_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_tablabel)
+					(( DEBUG )) || TERMINALS_COUNT_INSIDE_TAB_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_term_count_for_current_page)
+ 					local i _counting=0
+					local _numbers_with_commas="0"
+					while [ ${_counting} -lt ${TERMINALS_COUNT_INSIDE_TAB_} ] ; do
+          {
+            _numbers_with_commas="${_numbers_with_commas},${_counting}"
+            (( _counting++ ))
+          }
+          done
+					TERMINALS_="${_numbers_with_commas}"
+          (( DEBUG )) || LAST_TERMINAL_IN_TAB_=$(( TERMINALS_COUNT_INSIDE_TAB_  - 1 ))
+					qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.select_terminal ${LAST_TERMINAL_IN_TAB_}
           wait
         }
         wait
@@ -178,8 +219,27 @@ function load_tabs() {
         (( DEBUG )) && pront " +-- Change split Terminal:${_counter} Splt?:${_split}"
         {
           # (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}")
-					(( DEBUG )) || TERMINAL_ID_=$(guake  --split-horizontal)
+					# (( DEBUG )) || TERMINAL_ID_=$(guake  --split-horizontal)
           # (( DEBUG )) || TERMINAL_ID_=(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.splitTerminalTopBottom "$TERMINAL_ID_")
+ 					(( DEBUG )) || TERMINAL_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.h_split_current_terminal 50)
+				  (( DEBUG )) || TOTAL_TERMINAL_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_terminals_count)
+				  (( DEBUG )) || SESSION_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)	
+				  (( DEBUG )) || TOTAL_TABS_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)	
+					(( DEBUG )) || LAST_UUID_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_uuidtab)
+					(( DEBUG )) || TERMINAL_NUMBER_INSIDE_TAB_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_terminal)
+					(( DEBUG )) || LAST_TAB_LABEL_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_tablabel)
+					(( DEBUG )) || TERMINALS_COUNT_INSIDE_TAB_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_term_count_for_current_page)
+ 					local i _counting=0
+					local _numbers_with_commas="0"
+					while [ ${_counting} -lt ${TERMINALS_COUNT_INSIDE_TAB_} ] ; do
+          {
+            _numbers_with_commas="${_numbers_with_commas},${_counting}"
+            (( _counting++ ))
+          }
+          done
+					TERMINALS_="${_numbers_with_commas}"
+          (( DEBUG )) || LAST_TERMINAL_IN_TAB_=$(( TERMINALS_COUNT_INSIDE_TAB_  - 1 ))
+					qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.select_terminal ${LAST_TERMINAL_IN_TAB_}
           wait
         }
         wait
@@ -190,8 +250,27 @@ function load_tabs() {
         (( DEBUG )) && pront " +-- Change split Terminal:${_counter} Splt?:${_split}"
         {
           # (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}")
-					(( DEBUG )) || TERMINAL_ID_=$(guake  --split-horizontal)
+					# (( DEBUG )) || TERMINAL_ID_=$(guake  --split-horizontal)
           # (( DEBUG )) || TERMINAL_ID_=$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.splitTerminalTopBottom "$TERMINAL_ID_")
+ 					(( DEBUG )) || TERMINAL_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.h_split_current_terminal 50)
+				  (( DEBUG )) || TOTAL_TERMINAL_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_terminals_count)
+				  (( DEBUG )) || SESSION_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)	
+				  (( DEBUG )) || TOTAL_TABS_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)	
+					(( DEBUG )) || LAST_UUID_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_uuidtab)
+					(( DEBUG )) || TERMINAL_NUMBER_INSIDE_TAB_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_terminal)
+					(( DEBUG )) || LAST_TAB_LABEL_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_tablabel)
+					(( DEBUG )) || TERMINALS_COUNT_INSIDE_TAB_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_term_count_for_current_page)
+ 					local i _counting=0
+					local _numbers_with_commas="0"
+					while [ ${_counting} -lt ${TERMINALS_COUNT_INSIDE_TAB_} ] ; do
+          {
+            _numbers_with_commas="${_numbers_with_commas},${_counting}"
+            (( _counting++ ))
+          }
+          done
+					TERMINALS_="${_numbers_with_commas}"
+          (( DEBUG )) || LAST_TERMINAL_IN_TAB_=$(( TERMINALS_COUNT_INSIDE_TAB_  - 1 ))
+					qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.select_terminal ${LAST_TERMINAL_IN_TAB_}
           wait
         }
         wait
@@ -219,7 +298,11 @@ function load_tabs() {
 			local _title_new="$(sed 's/\ /\\ /g' <<< "${_alt_counter}.${_title}")"
       (( DEBUG )) && pront " +-- Change title Terminal:${_counter} Title:${_title_new}"
       # (( DEBUG )) || qdbus org.kde.yakuake /yakuake/tabs setTabTitle ${SESSION_ID_} "${_title_new}"
-      (( DEBUG )) || guake -r  "${_title_new}"
+      # (( DEBUG )) || guake -r  "${_title_new}"
+			# (( DEBUG )) || qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.rename_current_tab "${_title_new}"
+			(( DEBUG )) || qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.rename_tab_uuid "${LAST_UUID_ID_}" "${_title_new}"
+			# (( DEBUG )) || qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.rename_tab ${SESSION_ID_}  "${_title_new}"
+
     }
     fi
   } # end _yakuake_set_title
@@ -231,7 +314,10 @@ function load_tabs() {
         (( DEBUG )) && pront " +-- Change _path Terminal:${_counter} Path:${_path} and run Run:${_run} "
         pront "path&run SESSION_ID_=$SESSION_ID_ , TERMINAL_ID_=$TERMINAL_ID_ , path:$_path , path2:$_path2 , run:$_run , run2:$_run2,one:$_one"
         # (( DEBUG )) || qdbus org.kde.yakuake /yakuake/sessions runCommandInTerminal ${TERMINAL_ID_} "\"cd '${_path}' && ${_run}\""
-        (( DEBUG )) ||  guake -n guake -e """\"cd '${_path}' && ${_run}\"""" guake -r "${_title_new}"
+        # (( DEBUG )) ||  guake -n guake -e """\"cd '${_path}' && ${_run}\"""" guake -r "${_title_new}"
+				(( DEBUG )) || qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.execute_command_by_uuid "${LAST_UUID_ID_}" "cd '${_path}' && ${_run}" 
+				# (( DEBUG )) || qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.execute_command_current_termbox "cd '${_path}' && ${_run}" 
+				# (( DEBUG )) || qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.execute_command "cd '${_path}' && ${_run}" 
     }
     else
     {
@@ -240,14 +326,20 @@ function load_tabs() {
         (( DEBUG )) && pront " +-- Change _path Terminal:${_counter} Path:${_path}"
         pront "path only SESSION_ID_=$SESSION_ID_ , TERMINAL_ID_=$TERMINAL_ID_ , path:$_path , path2:$_path2 , run:$_run , run2:$_run2,one:$_one"
         # (( DEBUG )) || qdbus org.kde.yakuake /yakuake/sessions runCommandInTerminal ${TERMINAL_ID_} "\"cd '${_path}'\"" 
-        (( DEBUG )) ||  guake -n guake -e """\"cd '${_path}'\"""" guake -r "${_title_new}"
+        # (( DEBUG )) ||  guake -n guake -e """\"cd '${_path}'\"""" guake -r "${_title_new}"
+ 				(( DEBUG )) || qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.execute_command_by_uuid "${LAST_UUID_ID_}" "cd '${_path}'" 
+				# (( DEBUG )) || qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.execute_command_current_termbox "cd '${_path}'" 
+				# (( DEBUG )) || qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.execute_command "cd '${_path}'" 
       }
       elif [[ -n "${_run}" ]] ; then
       {
         (( DEBUG )) && pront " +-- Change execute Terminal:${_counter} Run:${_run}"
         pront "run only SESSION_ID_=$SESSION_ID_ , TERMINAL_ID_=$TERMINAL_ID_ , path:$_path , path2:$_path2 , run:$_run , run2:$_run2,one:$_one"
         # (( DEBUG )) || qdbus org.kde.yakuake /yakuake/sessions runCommandInTerminal ${TERMINAL_ID_} "\"${_run}\""
-				(( DEBUG )) ||  guake -n guake -e """\"${_run}\"""" guake -r "${_title_new}"
+				# (( DEBUG )) ||  guake -n guake -e """\"${_run}\"""" guake -r "${_title_new}"
+ 				(( DEBUG )) || qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.execute_command_by_uuid "${LAST_UUID_ID_}" "${_run}" 
+				# (( DEBUG )) || qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.execute_command_current_termbox "${_run}" 
+				# (( DEBUG )) || qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.execute_command "${_run}" 
       }
       fi
     }
@@ -256,10 +348,27 @@ function load_tabs() {
   function _yakuake_add_tab() {
     pront "${0} ${LINENO} ${FUNCNAME[0]}"
     {
-        (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}")
+      #  (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}")
 	    # (( DEBUG )) || TERMINAL_ID_=$(guake  --split-horizontal)
       # (( DEBUG )) || SESSION_ID_=$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession)
 			(( DEBUG )) || SESSION_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.add_tab)
+		  (( DEBUG )) || TOTAL_TERMINAL_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_terminals_count)
+		  (( DEBUG )) || SESSION_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)	
+		  (( DEBUG )) || TOTAL_TABS_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)	
+			(( DEBUG )) || LAST_UUID_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_uuidtab)
+			(( DEBUG )) || TERMINAL_NUMBER_INSIDE_TAB_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_terminal)
+			(( DEBUG )) || LAST_TAB_LABEL_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_tablabel)
+			(( DEBUG )) || TERMINALS_COUNT_INSIDE_TAB_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_term_count_for_current_page)
+ 			local i _counting=0
+			local _numbers_with_commas="0"
+			while [ ${_counting} -lt ${TERMINALS_COUNT_INSIDE_TAB_} ] ; do
+      {
+        _numbers_with_commas="${_numbers_with_commas},${_counting}"
+        (( _counting++ ))
+      }
+      done
+			TERMINALS_="${_numbers_with_commas}"
+      (( DEBUG )) || LAST_TERMINAL_IN_TAB_=$(( TERMINALS_COUNT_INSIDE_TAB_  - 1 ))
       wait
     }
     wait
@@ -272,15 +381,38 @@ function load_tabs() {
   function _yakuake_add_tab_quad() {
     pront "${0} ${LINENO} ${FUNCNAME[0]}"
     {
-      (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}")
-		 	(( DEBUG )) || TERMINAL_ID_=$(guake  --split-vertical)
-		 	(( DEBUG )) || TERMINAL_ID_=$(guake  --split-horizontal)
+      # (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}")
+		 	# (( DEBUG )) || TERMINAL_ID_=$(guake  --split-vertical)
+		 	# (( DEBUG )) || TERMINAL_ID_=$(guake  --split-horizontal)
       # (( DEBUG )) || SESSION_ID_=$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSessionQuad)
-      wait
+      (( DEBUG )) || SESSION_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.add_tab)
+      qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.h_split_current_terminal 50
+      qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.v_split_current_terminal 50
+      qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.select_terminal  0
+			qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.v_split_current_terminal 50
+			(( DEBUG )) || TOTAL_TERMINAL_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_terminals_count)
+		  (( DEBUG )) || SESSION_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)	
+		  (( DEBUG )) || TOTAL_TABS_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)	
+			(( DEBUG )) || LAST_UUID_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_uuidtab)
+			(( DEBUG )) || TERMINAL_NUMBER_INSIDE_TAB_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_terminal)
+			(( DEBUG )) || LAST_TAB_LABEL_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_tablabel)
+			(( DEBUG )) || TERMINALS_COUNT_INSIDE_TAB_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_term_count_for_current_page)
+      (( DEBUG )) || LAST_TERMINAL_IN_TAB_=$(( TERMINALS_COUNT_INSIDE_TAB_  - 1 ))
+			wait
     }
     wait
     {
+			# Expected TERMINALS_ to have 1,2,3,4,5,6 values
       # (( DEBUG )) || TERMINALS_=$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.terminalIdsForSessionId "$SESSION_ID_")
+ 			local i _counting=0
+			local _numbers_with_commas="0"
+			while [ ${_counting} -lt ${TERMINALS_COUNT_INSIDE_TAB_} ] ; do
+      {
+        _numbers_with_commas="${_numbers_with_commas},${_counting}"
+        (( _counting++ ))
+      }
+      done
+			TERMINALS_="${_numbers_with_commas}"
       (( DEBUG )) || TERMINAL_ID_=-1
       wait
     }
@@ -289,14 +421,37 @@ function load_tabs() {
   function _yakuake_add_tab_two_horizontal() {
     pront "${0} ${LINENO} ${FUNCNAME[0]}"
     {
-      (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}")
-		 	(( DEBUG )) || TERMINAL_ID_=$(guake  --split-horizontal)
+      # (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}")
+		 	# (( DEBUG )) || TERMINAL_ID_=$(guake  --split-horizontal)
       # (( DEBUG )) || SESSION_ID_=$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSessionTwoHorizontal)
-      wait
+      (( DEBUG )) || SESSION_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.add_tab)
+      qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.h_split_current_terminal 50
+      # qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.v_split_current_terminal 50
+      # qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.select_terminal  0
+			# qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.v_split_current_terminal 50
+			(( DEBUG )) || TOTAL_TERMINAL_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_terminals_count)
+		  (( DEBUG )) || SESSION_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)	
+		  (( DEBUG )) || TOTAL_TABS_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)	
+			(( DEBUG )) || LAST_UUID_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_uuidtab)
+			(( DEBUG )) || TERMINAL_NUMBER_INSIDE_TAB_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_terminal)
+			(( DEBUG )) || LAST_TAB_LABEL_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_tablabel)
+			(( DEBUG )) || TERMINALS_COUNT_INSIDE_TAB_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_term_count_for_current_page)
+      (( DEBUG )) || LAST_TERMINAL_IN_TAB_=$(( TERMINALS_COUNT_INSIDE_TAB_  - 1 ))
+	     wait
     }
     wait
     {
+			# Expected TERMINALS_ to have 1,2,3,4,5,6 values
       # (( DEBUG )) || TERMINALS_=$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.terminalIdsForSessionId "$SESSION_ID_")
+ 			local i _counting=0
+			local _numbers_with_commas="0"
+			while [ ${_counting} -lt ${TERMINALS_COUNT_INSIDE_TAB_} ] ; do
+      {
+        _numbers_with_commas="${_numbers_with_commas},${_counting}"
+        (( _counting++ ))
+      }
+      done
+			TERMINALS_="${_numbers_with_commas}"
       (( DEBUG )) || TERMINAL_ID_=-1
       wait
     }
@@ -305,14 +460,37 @@ function load_tabs() {
   function _yakuake_add_tab_two_vertical() {
     pront "${0} ${LINENO} ${FUNCNAME[0]}"
     {
-      (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}")
-		 	(( DEBUG )) || TERMINAL_ID_=$(guake  --split-vertical)
+      # (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}")
+		 	# (( DEBUG )) || TERMINAL_ID_=$(guake  --split-vertical)
       # (( DEBUG )) || SESSION_ID_=$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSessionTwoVertical)
-      wait
+      (( DEBUG )) || SESSION_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.add_tab)
+      # qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.h_split_current_terminal 50
+      qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.v_split_current_terminal 50
+      # qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.select_terminal  0
+			# qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.v_split_current_terminal 50
+			(( DEBUG )) || TOTAL_TERMINAL_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_terminals_count)
+		  (( DEBUG )) || SESSION_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)	
+		  (( DEBUG )) || TOTAL_TABS_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count)	
+			(( DEBUG )) || LAST_UUID_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_uuidtab)
+			(( DEBUG )) || TERMINAL_NUMBER_INSIDE_TAB_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_terminal)
+			(( DEBUG )) || LAST_TAB_LABEL_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_tablabel)
+			(( DEBUG )) || TERMINALS_COUNT_INSIDE_TAB_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_term_count_for_current_page)
+      (( DEBUG )) || LAST_TERMINAL_IN_TAB_=$(( TERMINALS_COUNT_INSIDE_TAB_  - 1 ))
+	     wait
     }
     wait
     {
+			# Expected TERMINALS_ to have 1,2,3,4,5,6 values
       # (( DEBUG )) || TERMINALS_=$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.terminalIdsForSessionId "$SESSION_ID_")
+ 			local i _counting=0
+			local _numbers_with_commas="0"
+			while [ ${_counting} -lt ${TERMINALS_COUNT_INSIDE_TAB_} ] ; do
+      {
+        _numbers_with_commas="${_numbers_with_commas},${_counting}"
+        (( _counting++ ))
+      }
+      done
+			TERMINALS_="${_numbers_with_commas}"
       (( DEBUG )) || TERMINAL_ID_=-1
       wait
     }
@@ -346,9 +524,9 @@ function load_tabs() {
     _path3="$(cut -d'|' -f9 <<< ${_one})"
     _run3="$(cut -d'|' -f10 <<< ${_one})"
      pront "Terminal ${_alt_counter} "
-   commands_to_execute="cd '${_path}' && ${_run}"  
-	 tab_title="${_title_new}"
-	 case "${_session_start_type}" in
+    commands_to_execute="cd '${_path}' && ${_run}"  
+	  tab_title="${_title_new}"
+	  case "${_session_start_type}" in
       simple*) _yakuake_add_tab ;;
       flat*) _yakuake_add_tab ;;
       quad*) _yakuake_add_tab_quad ;;
@@ -366,7 +544,10 @@ function load_tabs() {
         while read -r TERMINAL_ID_ ; do
         {
           [[ ${TERMINAL_ID_} -lt 0 ]] && continue
+					(( DEBUG )) || qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.select_terminal  ${TERMINAL_ID_}
+					(( DEBUG )) || LAST_UUID_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_uuidtab)
           _yakuake_path_and_run
+			    (( DEBUG )) || LAST_UUID_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_uuidtab)
           _yakuake_split
         }
         done <<< "${_terminal_list}"
@@ -379,7 +560,10 @@ function load_tabs() {
     }
     else
     {
+      (( DEBUG )) || qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.select_terminal 0
+			(( DEBUG )) || LAST_UUID_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_uuidtab)
       _yakuake_path_and_run
+			(( DEBUG )) || LAST_UUID_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_uuidtab)
       _yakuake_split
     }
     fi
