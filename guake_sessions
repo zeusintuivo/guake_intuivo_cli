@@ -125,8 +125,10 @@ function load_tabs() {
   _counter=0
   local -i _alt_counter
   _alt_counter=1
-  # local _current_sessions="$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.terminalIdList | sed 's/,/\n/g' | sort -n)"
+	# Get and array or list of sessions
+  local _current_sessions="$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.get_pages_count | sed 's/,/\n/g' | sort -n)"
   local _current_sessions=""
+	# Get and array or list of sessions, expeted return "0,1,2,3"
   # local _current_sessions="$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.sessionIdList | sed 's/,/\n/g' | sort -n)"
   local -i _num=0
   while read -r _num ; do
@@ -140,8 +142,9 @@ function load_tabs() {
 	local _split3  _path3  _run3
   local _yakuake_path_and_run _yakuake_set_title
 	local commands_to_execute=""
+  local tab_title=""
   function _yakuake_split() {
-		local tab_title="${_title_new}"
+		tab_title="${_title_new}"
     if [[ -n "${_split-}" ]] ; then
     {
       echo "split:${_split} Get a new TERMINAL_ID from the SPLIT of targeting TERMINAL_ID:$TERMINAL_ID_"
@@ -253,7 +256,10 @@ function load_tabs() {
   function _yakuake_add_tab() {
     pront "${0} ${LINENO} ${FUNCNAME[0]}"
     {
+        (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}")
+	    # (( DEBUG )) || TERMINAL_ID_=$(guake  --split-horizontal)
       # (( DEBUG )) || SESSION_ID_=$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession)
+			(( DEBUG )) || SESSION_ID_=$(qdbus org.guake3.RemoteControl /org/guake3/RemoteControl org.guake3.RemoteControl.add_tab)
       wait
     }
     wait
@@ -266,6 +272,9 @@ function load_tabs() {
   function _yakuake_add_tab_quad() {
     pront "${0} ${LINENO} ${FUNCNAME[0]}"
     {
+      (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}")
+		 	(( DEBUG )) || TERMINAL_ID_=$(guake  --split-vertical)
+		 	(( DEBUG )) || TERMINAL_ID_=$(guake  --split-horizontal)
       # (( DEBUG )) || SESSION_ID_=$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSessionQuad)
       wait
     }
@@ -280,6 +289,8 @@ function load_tabs() {
   function _yakuake_add_tab_two_horizontal() {
     pront "${0} ${LINENO} ${FUNCNAME[0]}"
     {
+      (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}")
+		 	(( DEBUG )) || TERMINAL_ID_=$(guake  --split-horizontal)
       # (( DEBUG )) || SESSION_ID_=$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSessionTwoHorizontal)
       wait
     }
@@ -294,6 +305,8 @@ function load_tabs() {
   function _yakuake_add_tab_two_vertical() {
     pront "${0} ${LINENO} ${FUNCNAME[0]}"
     {
+      (( DEBUG )) || TERMINAL_ID_=$(guake -n guake -e """$commands_to_execute""" guake -r "${tab_title}")
+		 	(( DEBUG )) || TERMINAL_ID_=$(guake  --split-vertical)
       # (( DEBUG )) || SESSION_ID_=$(qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSessionTwoVertical)
       wait
     }
@@ -333,7 +346,9 @@ function load_tabs() {
     _path3="$(cut -d'|' -f9 <<< ${_one})"
     _run3="$(cut -d'|' -f10 <<< ${_one})"
      pront "Terminal ${_alt_counter} "
-    case "${_session_start_type}" in
+   commands_to_execute="cd '${_path}' && ${_run}"  
+	 tab_title="${_title_new}"
+	 case "${_session_start_type}" in
       simple*) _yakuake_add_tab ;;
       flat*) _yakuake_add_tab ;;
       quad*) _yakuake_add_tab_quad ;;
