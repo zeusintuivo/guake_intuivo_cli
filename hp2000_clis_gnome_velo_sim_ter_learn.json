@@ -1,0 +1,232 @@
+{
+    "schema_version": 2,
+    "timestamp": 1662006047,
+    "workspace": {
+        "0": [
+            [
+                {
+                    "panes": [
+                        {
+                            "type": "dual_v",
+                            "directory": null
+                        },
+                        {
+                            "type": "term",
+                            "directory": "/home/zeus/_",
+                            "custom_colors": {
+                                "fg_color": null,
+                                "bg_color": null,
+                                "palette": null
+                            }
+                        },
+                        {
+                            "type": "term",
+                            "directory": "/home/zeus/_/software",
+                            "custom_colors": {
+                                "fg_color": null,
+                                "bg_color": null,
+                                "palette": null
+                            }
+                        }
+                    ],
+                    "label": "update",
+                    "custom_label_set": true
+                },
+                {
+                    "panes": [
+                        {
+                            "type": "dual_v",
+                            "directory": null
+                        },
+                        {
+                            "type": "term",
+                            "directory": "/home/zeus/_/clis",
+                            "custom_colors": {
+                                "fg_color": null,
+                                "bg_color": null,
+                                "palette": null
+                            }
+                        },
+                        {
+                            "type": "term",
+                            "directory": "/home/zeus/_/software/rubymine",
+                            "custom_colors": {
+                                "fg_color": null,
+                                "bg_color": null,
+                                "palette": null
+                            }
+                        }
+                    ],
+                    "label": "clis",
+                    "custom_label_set": true
+                },
+                {
+                    "panes": [
+                        {
+                            "type": "dual_v",
+                            "directory": null
+                        },
+                        {
+                            "type": "dual_h",
+                            "directory": null
+                        },
+                        {
+                            "type": "term",
+                            "directory": "/home/zeus/_/work/gnome/guake",
+                            "custom_colors": {
+                                "fg_color": null,
+                                "bg_color": null,
+                                "palette": null
+                            }
+                        },
+                        {
+                            "type": "term",
+                            "directory": "/home/zeus/.config/guake",
+                            "custom_colors": {
+                                "fg_color": null,
+                                "bg_color": null,
+                                "palette": null
+                            }
+                        },
+                        {
+                            "type": "term",
+                            "directory": "/home/zeus/_/work/data",
+                            "custom_colors": {
+                                "fg_color": null,
+                                "bg_color": null,
+                                "palette": null
+                            }
+                        }
+                    ],
+                    "label": "gnome",
+                    "custom_label_set": true
+                },
+                {
+                    "panes": [
+                        {
+                            "type": "dual_v",
+                            "directory": null
+                        },
+                        {
+                            "type": "term",
+                            "directory": "/home/zeus/_/work/velophil/projects",
+                            "custom_colors": {
+                                "fg_color": null,
+                                "bg_color": null,
+                                "palette": null
+                            }
+                        },
+                        {
+                            "type": "term",
+                            "directory": "/home/zeus/_/work/velophil/projects/20200919_nextcloud_wp_calendar_sync",
+                            "custom_colors": {
+                                "fg_color": null,
+                                "bg_color": null,
+                                "palette": null
+                            }
+                        }
+                    ],
+                    "label": "velophil",
+                    "custom_label_set": true
+                },
+                {
+                    "panes": [
+                        {
+                            "type": "dual_v",
+                            "directory": null
+                        },
+                        {
+                            "type": "dual_h",
+                            "directory": null
+                        },
+                        {
+                            "type": "term",
+                            "directory": "/home/zeus/_/work/velotermin/projects/2021_velotermin_v1_simple",
+                            "custom_colors": {
+                                "fg_color": null,
+                                "bg_color": null,
+                                "palette": null
+                            }
+                        },
+                        {
+                            "type": "term",
+                            "directory": "/home/zeus/_/work/velotermin/projects/2021_velotermin_v1_simple",
+                            "custom_colors": {
+                                "fg_color": null,
+                                "bg_color": null,
+                                "palette": null
+                            }
+                        },
+                        {
+                            "type": "dual_h",
+                            "directory": null
+                        },
+                        {
+                            "type": "term",
+                            "directory": "/home/zeus/_/work/velotermin/projects/2021_velotermin_v1_simple",
+                            "custom_colors": {
+                                "fg_color": null,
+                                "bg_color": null,
+                                "palette": null
+                            }
+                        },
+                        {
+                            "type": "term",
+                            "directory": "/home/zeus/_/work/velotermin/projects/2021_velotermin_v1_simple",
+                            "custom_colors": {
+                                "fg_color": null,
+                                "bg_color": null,
+                                "palette": null
+                            }
+                        }
+                    ],
+                    "label": "simple",
+                    "custom_label_set": true
+                },
+                {
+                    "panes": [
+                        {
+                            "type": "dual_v",
+                            "directory": null
+                        },
+                        {
+                            "type": "term",
+                            "directory": "/home/zeus/_/work/velotermin/projects/velotermin",
+                            "custom_colors": {
+                                "fg_color": null,
+                                "bg_color": null,
+                                "palette": null
+                            }
+                        },
+                        {
+                            "type": "term",
+                            "directory": "/home/zeus/_/work/velotermin/projects/velotermin",
+                            "custom_colors": {
+                                "fg_color": null,
+                                "bg_color": null,
+                                "palette": null
+                            }
+                        }
+                    ],
+                    "label": "velotermin",
+                    "custom_label_set": true
+                },
+                {
+                    "panes": [
+                        {
+                            "type": "term",
+                            "directory": "/home/zeus/_/learn/edu/13.Lynda.com/xREACT_Redux_RNative",
+                            "custom_colors": {
+                                "fg_color": null,
+                                "bg_color": null,
+                                "palette": null
+                            }
+                        }
+                    ],
+                    "label": "learn",
+                    "custom_label_set": true
+                }
+            ]
+        ]
+    }
+}

@@ -3,12 +3,23 @@
 #
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
-# Suggested to Place under Quick Open  PATTERN: /usr/local/bin/guake_quick_open_file_opener %(file_path)s:%(line_number)s
+# Suggested to Place under Quick Open  PATTERN: /usr/local/bin/iterm2_quick_open_file_opener %(file_path)s:%(line_number)s
 # MacOS using ITerm2.app
+#
 # iTerm2 > Profiles > Adv -> Semantic History > Run Co-process:
 # /usr/bin/env bash /Users/user.name/_/clis/guake_intuivo_cli/guake_quick_open_file_opener \1:\2 run_coprocess \3 \4 \5
+#
 # iTerm2 > Profiles > Adv -> Semantic History > Run Command:
 # /usr/bin/env bash /Users/user.name/_/clis/guake_intuivo_cli/guake_quick_open_file_opener \1:\2 run_command \3 \4 \5
+#
+# MacOS using ITerm2.app
+#
+# iTerm2 > Profiles > Adv -> Semantic History > Run Co-process:
+# /usr/bin/env bash /Users/user.name/_/clis/guake_intuivo_cli/iterm2_quick_open_file_opener \1:\2 run_coprocess \3 \4 \5
+#
+# iTerm2 > Profiles > Adv -> Semantic History > Run Command:
+# /usr/bin/env bash /Users/user.name/_/clis/guake_intuivo_cli/iterm2_quick_open_file_opener \1:\2 run_command \3 \4 \5
+
 # Linux Using Guake
 #
 # How to show line number when executing bash script REF: https://stackoverflow.com/questions/17804007/how-to-show-line-number-when-executing-bash-script
@@ -122,12 +133,12 @@ SHOW_OUTPUT=$(output_question)
 function _main(){
   local -i ITERM_RUN_COMMAND=0
   local -i DEBUG=1
-  local WORKING_FOLDER
-  WORKING_FOLDER=$(pwd)  # in MacOs Iterm defaults to /
   local clicked_extension
   local clicked_name
   local resolved_name
   local clicked_line_number
+  local WORKING_FOLDER
+  WORKING_FOLDER=$(pwd)  # in MacOs Iterm defaults to /
     # How to check if a variable is set in Bash? REF: https://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash if [ -z ${var+x} ]; then echo "var is unset"; else echo "var is set to '$var'"; fi
     local -i ITERM=0
     # ((   ITERM )) && [[ -f "${HOME}/.temp_keys" ]] && echo "source \"${HOME}/.temp_keys\""
@@ -136,7 +147,15 @@ function _main(){
     # (( ! ITERM )) && [ -f .temp_keys ] && . .temp_keys
     if [ -z ${ITERM_PROFILE+x} ]; then ITERM=0; else ITERM=1; fi
     (( ! ITERM )) && if ( env | grep "ITERM"  &>/dev/null  ); then ITERM=1; else ITERM=0; fi
-    (( ! ITERM )) && if ( env | grep "__CFBundleIdentifier"  &>/dev/null  ); then ITERM=1; else ITERM=0; fi
+    if (( ! ITERM )) &&  ( env | grep "__CFBundleIdentifier"  &>/dev/null  ); then
+    {
+      ITERM=1;
+    }
+    else
+    {
+      ITERM=0;
+    }
+    fi
 
     # if [[ "${SHELL}" == *"zsh" ]] ; then
     # {
@@ -184,6 +203,8 @@ function _main(){
     # After EDITOR from $HOME/.temp_keys
     # After EDITOR var defined
     local _saved_editor="${EDITOR}";
+  (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} \"WORKING_FOLDER: ${WORKING_FOLDER}\""
+  (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} \"WORKING_FOLDER: ${WORKING_FOLDER}\""
     if [[  -z ${EDITOR} ]] ; then
     {
       (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO}  EDITOR VAR not found in ${SHELL} environment"
@@ -328,6 +349,7 @@ function _main(){
           fi
         }
         fi
+        echo "echo \"${EDITOR2}\""
         echo subl -g "${clicked_name}:${clicked_line_number}" &
         if [[ "${EDITOR}" == *"nano" ]] ; then
         {
@@ -374,7 +396,92 @@ function _main(){
   function run_editor_based_on_knowledge() {
       (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} EDITOR defined:${EDITOR}"
       (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} \"EDITOR defined:${EDITOR}\""
-      if ( command -v "${EDITOR}" >/dev/null 2>&1 ) || ([[ "${EDITOR}" == *"emacsnw" ]] && ( command -v emacs >/dev/null 2>&1 ) ); then
+      if ( command -v "${EDITOR}" >/dev/null 2>&1 ) ; then
+      {
+        (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} Command  \"${EDITOR}\" found"
+        (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} Command  \"${EDITOR}\" found"
+        if [[ "${EDITOR}" == *"code-insiders" ]] || \
+           [[ "${EDITOR}" == *"code" ]] ; then
+        {
+          (( SHOW_OUTPUT )) && echo Running 4022
+          echo "${EDITOR}" -g "${clicked_name}:${clicked_line_number}" &
+          ${EDITOR} -g "${clicked_name}:${clicked_line_number}" &
+          return 0
+        }
+        elif [[ "${EDITOR}" == *"subl" ]] ; then
+        {
+          (( SHOW_OUTPUT )) && echo Running 4032
+          echo "${EDITOR}"  "${clicked_name}:${clicked_line_number} &"
+          "${EDITOR}"  "${clicked_name}:${clicked_line_number}" &
+          return 0
+        }
+        elif [[ "${EDITOR}" == *"nano" ]] ; then
+        {
+          (( SHOW_OUTPUT )) && echo Running 4033
+          echo "${EDITOR}" +${clicked_line_number} "${clicked_name} &"
+          "${EDITOR}" +${clicked_line_number} "${clicked_name} &"
+          return 0
+        }
+        fi
+        (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} editor logic not programmed:  \"${EDITOR}\" "
+        (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} editor logic not programmed:  \"${EDITOR}\" "
+        return 1
+      }
+      else
+      {
+        (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} Command  \"${EDITOR}\" NOT found"
+        (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} Command  \"${EDITOR}\" NOT found"
+        local PATCHED_EDITOR="/usr/local/bin/${EDITOR}"
+        if ( command -v "${PATCHED_EDITOR}" >/dev/null 2>&1 ) ; then
+        {
+          (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} PATCHED_EDITOR Command  \"${PATCHED_EDITOR}\" found"
+          (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} PATCHED_EDITOR Command  \"${PATCHED_EDITOR}\" found"
+          (( SHOW_OUTPUT )) && echo Running 4077
+          if [[ "${EDITOR}" == *"subl" ]] ; then
+          {
+            (( SHOW_OUTPUT )) && echo Running 4077-1
+            echo "${PATCHED_EDITOR}" -g "${clicked_name}:${clicked_line_number}" &
+            ${PATCHED_EDITOR} -g "${clicked_name}:${clicked_line_number}" &
+            return 0
+          }
+          elif [[ "${EDITOR}" == *"mine" ]] ; then
+          {
+            (( SHOW_OUTPUT )) && echo Running 4077-2
+            echo "${PATCHED_EDITOR}" --line ${clicked_line_number} "${clicked_name}" &
+            ${PATCHED_EDITOR}  --line ${clicked_line_number} "${clicked_name}" &
+            return 0
+          }
+          elif [[ "${EDITOR}" == *"code" ]] ; then
+          {
+            (( SHOW_OUTPUT )) && echo Running 4077-3
+            echo "${PATCHED_EDITOR}"  -g "${clicked_name}:${clicked_line_number}" &
+            ${PATCHED_EDITOR}  -g "${clicked_name}:${clicked_line_number}" &
+            return 0
+          }
+          elif [[ "${EDITOR}" == *"insiders" ]] ; then
+          {
+            (( SHOW_OUTPUT )) && echo Running 4077-4
+            echo "${PATCHED_EDITOR}"  -g "${clicked_name}:${clicked_line_number}" &
+            ${PATCHED_EDITOR}  -g "${clicked_name}:${clicked_line_number}" &
+            return 0
+          }
+          fi
+          (( SHOW_OUTPUT )) && echo Running 4090 else not found  custom but run it either way
+          echo "${PATCHED_EDITOR}" "${clicked_name}:${clicked_line_number}" &
+          ${PATCHED_EDITOR} "${clicked_name}:${clicked_line_number}" &
+          return 0
+        }
+        else
+        {
+          (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} PATCHED_EDITOR Command  \"${PATCHED_EDITOR}\" NOT found"
+          (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} PATCHED_EDITOR Command  \"${PATCHED_EDITOR}\" NOT found"
+
+        }
+        fi
+        return 1
+      }
+      fi
+      if ( command -v "${EDITOR}" >/dev/null 2>&1 ) ; then
       {
         (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} Command  \"${EDITOR}\" found"
         (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} Command  \"${EDITOR}\" found"
@@ -544,6 +651,8 @@ function _main(){
           [[ "${EDITOR}" == *"/usr/local/bin/webstorm" ]] || \
           [[ "${EDITOR}" == *"charm" ]] || \
           [[ "${EDITOR}" == *"/usr/local/bin/charm" ]] || \
+          [[ "${EDITOR}" == *"studio" ]] || \
+          [[ "${EDITOR}" == *"/usr/local/bin/studio" ]] || \
           [[ "${EDITOR}" == *"pstorm" ]] || \
           [[ "${EDITOR}" == *"/usr/local/bin/pstorm" ]] || \
           [[ "${EDITOR}" == *"mine" ]] || \
@@ -626,7 +735,7 @@ function _main(){
         }
         else
         {
-          (( SHOW_OUTPUT )) && echo NO EDITOR in list of guake_quick_open_file_opener here attempting anyways
+          (( SHOW_OUTPUT )) && echo NO EDITOR in list of iterm2_quick_open_file_opener here attempting anyways
           (( SHOW_OUTPUT )) && echo Running 77
           ((   GUAKE_AVAILABLE )) && (( SHOW_OUTPUT )) && echo guake -e "${EDITOR} ${clicked_name}:${clicked_line_number}"&
           ((   GUAKE_AVAILABLE )) && guake -e "${EDITOR} ${clicked_name}:${clicked_line_number}"&
@@ -647,6 +756,76 @@ function _main(){
       fi
   } # end run_editor_based_on_knowledge
 
+  function ._attempt_to_find_temp_keys_cd_dot_dot() {
+    local _looking_folder="${1:-}"
+    local _cwd="$(pwd)"
+
+    (( SHOW_OUTPUT )) && set +e
+
+    if [[ ! -e "${_looking_folder}" ]] ; then
+    {
+      (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} Could not access _looking_folder:$_looking_folder"
+      (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} Could not access _looking_folder:$_looking_folder"
+      return 0
+    }
+    fi
+    local _curr_cd="${_looking_folder}"
+    local -i _found=0
+    local -i _no_more=0
+    local -i _counter=0
+    while [ ${_found} -eq 0 ] && [ ${_no_more} -eq 0 ] && [ ${_counter} -lt 500 ] ; do
+    {
+      cd  "${_curr_cd}"
+      (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} .temp_keys in _curr_cd:$_curr_cd"
+      (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} .temp_keys in _curr_cd:$_curr_cd"
+
+      if [[ ! -e "${_curr_cd}/.temp_keys" ]] ; then
+      {
+        if [[ "${_curr_cd}" == '/' ]] ; then
+        {
+          _no_more=1
+        }
+        fi
+        cd ..
+        _curr_cd="$(pwd)"
+        _counter=$(( _counter+1 ))
+        continue
+      }
+      fi
+      ((   ITERM )) && [[ -f "${_curr_cd}/.temp_keys" ]] && echo "source \"${_curr_cd}/.temp_keys\""
+      (( ! ITERM )) && [[ -f "${_curr_cd}/.temp_keys" ]] && . "${_curr_cd}/.temp_keys"
+      # echo "echo $0:${LINENO} ITERM:$ITERM"
+      # echo "$0:${LINENO} ITERM:$ITERM"
+      if ((   ITERM == 1 )) && [[ -f "${_curr_cd}/.temp_keys" ]] ; then
+      {
+        source "${_curr_cd}/.temp_keys"
+      }
+      fi
+      # source "${_curr_cd}/.temp_keys"
+      # env
+      (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} EDITOR:$EDITOR"
+      (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} EDITOR:$EDITOR"
+      ((   ITERM )) && [ -f .temp_keys ] && echo "source .temp_keys"
+      (( ! ITERM )) && [ -f .temp_keys ] && . .temp_keys
+      if [[ "${_curr_cd}" == '/' ]] ; then
+      {
+        _no_more=1
+      }
+      fi
+      if [[ -n "${EDITOR}" ]] ; then
+      {
+        (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} EDITOR:$EDITOR Found in:$_curr_cd"
+        (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} EDITOR:$EDITOR Found in:$_curr_cd"
+        _no_more=1
+      }
+      fi
+      _counter=$(( _counter+1 ))
+    }
+    done
+    cd "${_looking_folder}"
+
+  } # end ._attempt_to_find_temp_keys_cd_dot_dot
+
   function default_editor() {
     #  args={"vim", "+"..lineno, name}
     # -- args={"nano", "+"..lineno, name}
@@ -663,14 +842,21 @@ function _main(){
     (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} clicked_line_number:$clicked_line_number"
     (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} WORKING_FOLDER:$WORKING_FOLDER"
     (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} WORKING_FOLDER:$WORKING_FOLDER"
-    (( SHOW_OUTPUT )) && set +e
+
+
+    ._attempt_to_find_temp_keys_cd_dot_dot "${WORKING_FOLDER}"
+
+
+
+    (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} EDITOR:$EDITOR"
+    (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} EDITOR:$EDITOR"
 
     if [[  -n "${EDITOR}" ]] ; then
-      run_editor_based_on_knowledge
+      run_editor_based_on_knowledge 2>&1
     else  # EDITOR VAR not found in bash environment
       # decide_editor
       EDITOR="/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl"
-      run_editor_based_on_knowledge
+      run_editor_based_on_knowledge 2>&1
     fi
   } # end default_editor
 
@@ -816,11 +1002,19 @@ function _main(){
   } # end try_to_guess_editor_from_project_dirs
 
   clicked_name=$(file_name "${*}")
+  if [[ "${clicked_name}" == *":"* ]] ; then
+  {
+    # case 1 "/Users/administrator/_/clis/execute_command_intuivo_cli/struct_testing:2355 run_command  _if_not_contains()    ☠  OFFENDING COMMAND:     ☠  OFFENDING e x i t: 1     ☠  Offending message:     ☠  ERROR STACK TRACE: 9    /Users/administrator/_/clis/execute_command_intuivo_cli/struct_testing"
+    clicked_name="$(cut -d":" -f1 <<< "${clicked_name}")"
+  }
+  fi
   (( DEBUG )) && (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} \"clicked_name:${clicked_name}\""
   (( DEBUG )) && (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} \"clicked_name:${clicked_name}\""
   if ( command -v paeth >/dev/null 2>&1 ) ; then
   {
+
     resolved_name=$(paeth "${clicked_name}")
+
     (( DEBUG )) && (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} \"resolved_name:${resolved_name}\""
     (( DEBUG )) && (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} \"resolved_name:${resolved_name}\""
   }
@@ -830,22 +1024,22 @@ function _main(){
   (( DEBUG )) && (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} \"clicked_extension:${clicked_extension}\""
   if [[ "${clicked_extension}" == "${clicked_name}" ]] ; then
   {
-    clicked_extension=""
+    clicked_extension=''
   }
   fi
   (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} clicked_extension:$clicked_extension"
   (( SHOW_OUTPUT )) && (( ! ITERM )) && echo $0:${LINENO} clicked_extension:$clicked_extension
-  local test_line_number=""
+  local test_line_number=''
   test_line_number="$(cut -d":" -f2 <<< "${*}")"
   (( DEBUG )) && (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} \"test_line_number test:${test_line_number}\""
 
   clicked_line_number=$(line_number "${test_line_number}")
   (( DEBUG )) && (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} \"line_number found:${clicked_line_number}\""
-  (( DEBUG )) && (( SHOW_OUTPUT )) && (( ! ITERM )) && echo $0:${LINENO} "line_number found:${clicked_line_number}"
+  (( DEBUG )) && (( SHOW_OUTPUT )) && (( ! ITERM )) && echo "$0:${LINENO} line_number found:${clicked_line_number}"
 
 
-  local test_working=""
-  test_working="$(cut -d" " -f3 <<< "${*}")"
+  local test_working=''
+  test_working="$(cut -d\  -f3 <<< "${*}")"
   (( DEBUG )) && (( SHOW_OUTPUT )) && ((   ITERM )) && echo "echo $0:${LINENO} \"test_working:${test_working}\""
   (( DEBUG )) && (( SHOW_OUTPUT )) && (( ! ITERM )) && echo $0:${LINENO} "test_working:${test_working}"
   if [[ -n "${test_working}" ]] ; then

@@ -7,7 +7,9 @@
 
 # DEBUG
 echo "
-Start
+-----------------------------------------------------------------------------------
+Start -----------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
 echo 0:$0
 echo 1:$1
 echo 2:$2
@@ -23,6 +25,7 @@ line="${2}"
 text_before_click="${3}"
 text_after_click="${4}"
 working_folder="${5}"
+
 if [ -z ${working_folder} ] ; then
 {
   file="${1}"
@@ -46,8 +49,8 @@ working_folder="${working_folder}"
 # /usr/local/bin/subl -g "${file}:${line}"
 echo "
 Calling iterm2_quick_open_file_opener
-${HOME}/_/clis/guake_intuivo_cli/iterm2_quick_open_file_opener \"${file}:${line}\" \"run_command\" \"${working_folder}\""  >>"${HOME}/iterm2_click_handler.log"
-"${HOME}/_/clis/guake_intuivo_cli/iterm2_quick_open_file_opener" "${file}:${line}" "run_command" "${working_folder}" >>"${HOME}/iterm2_click_handler.log"
+${HOME}/_/clis/guake_intuivo_cli/iterm2_quick_open_file_opener \"${file}:${line}\" \"run_command\" \"${working_folder}\""  >>"${HOME}/iterm2_click_handler.log"  
+"${HOME}/_/clis/guake_intuivo_cli/iterm2_quick_open_file_opener" "${file}:${line}" "run_command" "${working_folder}" >>"${HOME}/iterm2_click_handler.log" 2>&1
 # "${HOME}/_/clis/guake_intuivo_cli/iterm2_quick_open_file_opener" "${file}:${line}" "run_command" "${working_folder}" "${text_before_click}" "${text_after_click}" >>"${HOME}/iterm2_click_handler.log"
 
 exit 0

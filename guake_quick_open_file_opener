@@ -3,7 +3,12 @@
 #
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
-# Suggesged to Place under Quick Open  PATTERN: /usr/local/bin/guake_quick_open_file_opener %(file_path)s:%(line_number)s
+# Suggested to Place under Quick Open  PATTERN: /usr/local/bin/guake_quick_open_file_opener %(file_path)s:%(line_number)s
+# MacOS using ITerm2.app
+# iTerm2 > Profiles > Adv -> Semantic History > Run Co-process:
+# /usr/bin/env bash /Users/user.name/_/clis/guake_intuivo_cli/guake_quick_open_file_opener \1:\2 run_coprocess \3 \4 \5
+# iTerm2 > Profiles > Adv -> Semantic History > Run Command:
+# /usr/bin/env bash /Users/user.name/_/clis/guake_intuivo_cli/guake_quick_open_file_opener \1:\2 run_command \3 \4 \5
 
 function open_command() {
     # emulate -L zsh
@@ -195,6 +200,7 @@ function _main(){
     # -- args={"code-insiders", "-g", name..":"..lineno}
     (( SHOWOUTPUT )) && echo clicked_linenumber:$clicked_linenumber
     (( SHOWOUTPUT )) && set +e
+    # [ -f "$HOME/.temp_keys" ] && . $HOME/.temp_keys
     [ -f .temp_keys ] && . .temp_keys
     if [[  -n "${EDITOR}" ]] ; then
     {
@@ -312,6 +318,8 @@ function _main(){
         }
         elif [[ "${EDITOR}" == *"webstorm" ]] || \
           [[ "${EDITOR}" == *"/usr/local/bin/webstorm" ]] || \
+          [[ "${EDITOR}" == *"studio" ]] || \
+          [[ "${EDITOR}" == *"/usr/local/bin/studio" ]] || \
           [[ "${EDITOR}" == *"charm" ]] || \
           [[ "${EDITOR}" == *"/usr/local/bin/charm" ]] || \
           [[ "${EDITOR}" == *"pstorm" ]] || \
@@ -376,13 +384,47 @@ function _main(){
       {
         # echo mine  "${*}"
         echo code -g  \""${*}"\"
-        guake --hide&
-      } else {
+        ((   GUAKE_AVAILABLE )) && guake --hide&
+        return 0
+      }
+      else
+      { 
+	if [ -e /usr/local/bin/studio ] ; then
+	{
+    echo "echo 'EXECUTING studio'"
+	   echo /usr/local/bin/studio "${*}" &
+	   /usr/local/bin/studio "${*}" &
+           ((   GUAKE_AVAILABLE )) && guake --hide&
+           return 0
+	}  
+  elif [ -e /usr/bin/subl ] ; then
+  {
+    echo "echo 'EXECUTING subl'"
+     echo /usr/bin/subl -g "${*}" &
+     /usr/bin/subl  -g "${*}" &
+           ((   GUAKE_AVAILABLE )) && guake --hide&
+           return 0
+  } 
+	elif [ -e /usr/local/bin/subl ] ; then
+        {
+           echo /usr/local/bin/subl  -g "${*}" &
+           /usr/local/bin/subl  -g "${*}" &
+           ((   GUAKE_AVAILABLE )) && guake --hide&
+           return 0
+        }
+        else
+	{
+  	  echo subl  -g "${*}" &
+	  subl  -g "${*}" &
+          ((   GUAKE_AVAILABLE )) && guake --hide&
+          return 0
+	}
+	fi
         echo subl  -g "${*}"
-        guake --hide&
+        ((   GUAKE_AVAILABLE )) && guake --hide&
+        return 0
       }
       fi
-      exit 0
       if ( command -v subl >/dev/null 2>&1 ); then
       {
         (( SHOWOUTPUT )) && echo Running 10

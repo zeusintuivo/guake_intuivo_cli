@@ -1,0 +1,32 @@
+[
+{
+"type": "menu",
+"description": "velotermin",
+"items": [
+{
+"description": "1. mongod",
+"cmd":["mongod&"]
+},
+{
+"description": "2. redis",
+"cmd":["redis-server"]
+},
+{
+"description": "3. tails",
+"cmd":["./runtails.sh"]
+},
+{
+"description": "4. rails",
+"cmd":["./runtails.sh"]
+},
+{
+"description": "5. zeus live reload",
+"cmd":["bundle exec guard"]
+}
+]
+},
+{
+"description": "go healix",
+"cmd": ["cd", ""]
+}
+]
