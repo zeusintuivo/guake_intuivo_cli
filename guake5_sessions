@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+
+# Function to log messages with timestamp and type, with color
+function log() {
+    local type="$1"
+    local message="${@:2}"
+    local color
+    case "$type" in
+        INFO) color="\033[0;32m" ;; # Green
+        ERROR) color="\033[0;31m" ;; # Red
+        WARN) color="\033[0;33m" ;; # Yellow
+        *) color="\033[0m" ;; # No color
+    esac
+    echo -e "${color}$(date '+%Y-%m-%d %H:%M:%S') [$type] $message\033[0m"
+}
+
+# Load global color configurations
+function load_global_colors() {
+    : ${BLACK:="\033[38;5;16m"}
+    : ${CYAN:="\033[38;5;123m"}
+    : ${PURPLE:="\033[01;35m"}
+    : ${RED:="\033[38;5;1m"}
+    : ${RESET:="\033[0m"}
+}
+
+load_global_colors
+
+# Check command line arguments
+function check_input_arguments() {
+    if [[ $# -ne 1 ]]; then
+        log ERROR "Usage: $0 <session_file>"
+        exit 1
+    fi
+}
+
+# Process each session from the file
+function process_sessions() {
+    local session_file="$1"
+    if [[ ! -f "$session_file" ]]; then
+        log ERROR "Session file not found: $session_file"
+        exit 1
+    fi
+
+    while IFS='|' read -r session_type title directory command split_option split_directory split_command; do
+        [[ "$session_type" == "" || "$session_type" == \#* ]] && continue
+        local session_id=$(add_tab "$title")
+        configure_terminal "$session_id" "$directory" "$command"
+        handle_split "$session_id" "$split_option" "$split_directory" "$split_command"
+    done < "$session_file"
+}
+
+# Add a new tab and return the session id
+function add_tab() {
+    local title="$1"
+    local session_id=$(dbus-send --type=method_call --dest=org.guake3.RemoteControl \
+                      /org/guake3/RemoteControl org.guake3.RemoteControl.add_tab)
+    dbus-send --type=method_call --dest=org.guake3.RemoteControl \
+              /org/guake3/RemoteControl org.guake3.RemoteControl.set_tab_title string:"$title"
+    echo "$session_id"
+}
+
+# Configure terminal with a directory and command
+function configure_terminal() {
+    local session_id="$1"
+    local directory="$2"
+    local command="$3"
+    dbus-send --type=method_call --dest=org.guake3.RemoteControl \
+              /org/guake3/RemoteControl org.guake3.RemoteControl.execute_command string:"cd $directory && $command"
+}
+
+# Handle terminal splitting and additional commands
+function handle_split() {
+    local session_id="$1"
+    local split_option="$2"
+    local split_directory="$3"
+    local split_command="$4"
+
+    if [[ -n "$split_option" ]]; then
+        # Assuming split_option can be 'left', 'right', 'top', 'bottom'
+        dbus-send --type=method_call --dest=org.guake3.RemoteControl \
+                  /org/guake3/RemoteControl org.guake3.RemoteControl.split_terminal string:"$split_option"
+        dbus-send --type=method_call --dest=org.guake3.RemoteControl \
+                  /org/guake3/RemoteControl org.guake3.RemoteControl.execute_command string:"cd $split_directory && $split_command"
+    fi
+}
+
+# Main function to start the process
+function main() {
+    load_global_colors
+    check_input_arguments "$@"
+    process_sessions "$1"
+}
+
+main "$@"
+

@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+
+# Function to log messages with timestamp and type
+function log() {
+    local type="$1"
+    local message="${@:2}"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [$type] $message"
+}
+
+# Function to load global colors
+function load_global_colors() {
+    : ${BLACK:="\033[38;5;16m"}
+    : ${CYAN:="\033[38;5;123m"}
+    : ${PURPLE:="\033[01;35m"}
+    : ${RED:="\033[38;5;1m"}
+    : ${RESET:="\033[0m"}
+}
+
+# Checking input arguments
+function check_input_arguments() {
+    if [[ $# -ne 1 ]]; then
+        log ERROR "Usage: $0 <session_file>"
+        exit 1
+    fi
+}
+
+# Read sessions file and process each session
+function process_sessions() {
+    local session_file="$1"
+    if [[ ! -f "$session_file" ]]; then
+        log ERROR "Session file not found: $session_file"
+        exit 1
+    fi
+
+    while IFS='|' read -r session_type title directory command split_options; do
+        # Skip empty lines or comments
+        [[ "$session_type" == "" || "$session_type" == \#* ]] && continue
+
+        # Process each session based on its type
+        handle_session "$session_type" "$title" "$directory" "$command" "$split_options"
+    done < "$session_file"
+}
+
+# Handle session based on type
+function handle_session() {
+    local session_type="$1"
+    local title="$2"
+    local directory="$3"
+    local command="$4"
+    local split_options="$5"
+
+    local session_id=$(add_tab "$title")
+
+    case "$session_type" in
+        simple|flat)
+            configure_terminal "$session_id" "$directory" "$command"
+            ;;
+        vertical|horizontal|quad)
+            local dirs=(${directory//,/ })
+            local cmds=(${command//,/ })
+            configure_complex_terminal "$session_id" "$session_type" dirs cmds
+            ;;
+        *)
+            log ERROR "Unsupported session type: $session_type"
+            ;;
+    esac
+}
+
+# Add a new tab and set its title
+function add_tab() {
+    local title="$1"
+    local session_id=$(dbus-send --type=method_call --dest=org.guake3.RemoteControl \
+                      /org/guake3/RemoteControl org.guake3.RemoteControl.add_tab)
+    dbus-send --type=method_call --dest=org.guake3.RemoteControl \
+              /org/guake3/RemoteControl org.guake3.RemoteControl.set_tab_title string:"$title"
+    echo "$session_id"
+}
+
+# Configure terminal with a single directory and command
+function configure_terminal() {
+    local session_id="$1"
+    local directory="$2"
+    local command="$3"
+    execute_command "$session_id" "cd $directory && $command"
+}
+
+# Configure terminals for complex setups like 'quad'
+function configure_complex_terminal() {
+    local session_id="$1"
+    local session_type="$2"
+    local -n dirs="$3"
+    local -n cmds="$4"
+
+    local total=${#dirs[@]}
+    local i=0
+    while [ $i -lt $total ]; do
+        execute_command "$session_id" "cd ${dirs[$i]} && ${cmds[$i]}"
+        ((i++))
+    done
+}
+
+# Execute a command in the specified terminal
+function execute_command() {
+    local session_id="$1"
+    local command="$2"
+    dbus-send --type=method_call --dest=org.guake3.RemoteControl \
+              /org/guake3/RemoteControl org.guake3.RemoteControl.execute_command string:"$command"
+}
+
+# Main execution block
+function main() {
+    load_global_colors
+    check_input_arguments "$@"
+    process_sessions "$1"
+}
+
+main "$@"
+

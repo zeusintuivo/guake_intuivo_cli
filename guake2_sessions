@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# Script to manage terminal sessions using dbus-send for Guake terminal emulator
+
+# Function to log messages
+function log() {
+    local type="$1"
+    local message="${@:2}"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [$type] $message"
+}
+
+# Function to load global colors if not already set
+function load_global_colors() {
+    : ${BLACK:="\033[38;5;16m"}
+    : ${CYAN:="\033[38;5;123m"}
+    : ${PURPLE:="\033[01;35m"}
+    : ${RED:="\033[38;5;1m"}
+    : ${RESET:="\033[0m"}
+}
+
+# Call the load_global_colors function
+load_global_colors
+
+# Function to handle the execution of dbus-send commands
+function execute_dbus_command() {
+    local command="dbus-send --type=method_call --dest=org.guake3.RemoteControl $@"
+    eval "$command"
+    local status=$?
+    if [ $status -ne 0 ]; then
+        log ERROR "Command failed: $command"
+        return $status
+    fi
+    return 0
+}
+
+# Function to add a new tab and split based on the required layout
+function add_and_configure_tab() {
+    local layout=$1
+    execute_dbus_command /org/guake3/RemoteControl org.guake3.RemoteControl.add_tab
+    local terminal_id=$(execute_dbus_command /org/guake3/RemoteControl org.guake3.RemoteControl.get_selected_terminal)
+    log INFO "New tab added with Terminal ID: $terminal_id"
+    
+    case "$layout" in
+        vertical)
+            execute_dbus_command /org/guake3/RemoteControl org.guake3.RemoteControl.v_split_current_terminal 50 ;;
+        horizontal)
+            execute_dbus_command /org/guake3/RemoteControl org.guake3.RemoteControl.h_split_current_terminal 50 ;;
+        *)
+            log ERROR "Unsupported layout: $layout" ;;
+    esac
+}
+
+# Main function to load terminal sessions from a file
+function load_sessions_from_file() {
+    local file=$1
+    if [ ! -f "$file" ]; then
+        log ERROR "File not found: $file"
+        return 1
+    fi
+
+    while IFS='|' read -r session_type title path command split; do
+        [ -z "$session_type" ] && continue
+        log INFO "Processing session: $title"
+        add_and_configure_tab "$split"
+        execute_dbus_command /org/guake3/RemoteControl org.guake3.RemoteControl.rename_current_tab "$title"
+        execute_dbus_command /org/guake3/RemoteControl org.guake3.RemoteControl.execute_command "cd '$path' && $command"
+    done < <(grep -vE '^\s*#' "$file")
+}
+
+# Main execution block
+if [ "$#" -gt 0 ]; then
+    case "$1" in
+        --file)
+            load_sessions_from_file "$2"
+            ;;
+        *)
+            log ERROR "Invalid argument: $1"
+            ;;
+    esac
+else
+    log INFO "No arguments provided. Exiting."
+fi
+

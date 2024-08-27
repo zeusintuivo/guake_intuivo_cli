@@ -1,0 +1,163 @@
+#!/usr/bin/env bash
+
+# Enhanced function to log messages with color based on the log type
+#!/usr/bin/env bash
+# dbus-send instead of qdbus
+# You can replace qdbus bundled with Qt with more common dbus-send. For
+#example, to show/hide Yakuake:
+# dbus-send --type=method_call --dest=org.kde.yakuake /yakuake/window org.kde.yakuake.toggleWindowState
+
+# YAKUAKEDBUS=qdbus
+YAKUAKEDBUS=dbus-send
+function log() {
+  #  usage:
+  # log "INFO some info message"
+  # log "DEBUG some debug message"
+  # log "WARN some warning message"
+  # log "ERROR some really ERROR message"
+  # log "FATAL some really fatal message"
+  # shellcheck disable=SC2155
+  local type_of_msg=$(echo "${@}" | cut -d" " -f1)
+  # shellcheck disable=SC2155
+  local msg=$(echo "${@}" | cut -d" " -f2-)
+  local _datum=$(date "+%Y.%m.%d-%H:%M:%S %Z")
+  case "${type_of_msg}" in
+    INFO*)  echo -en " ${PURPLE_BLUE-}[${GRAY241-}" ;;
+    ERROR*) echo -en " ${PURPLE-}[${RED-}" ;;
+    *)  echo -en " ${PURPLE_BLUE-}[${YELLOW226-}" ;;
+  esac
+  echo -en "${type_of_msg}"
+  case "${type_of_msg}" in
+    ERROR*) echo -e "${PURPLE-}] ${GRAY200-}${_datum}${RED89-}[${RED126-}$$${RED89-}] ${RED126-}${msg}${RESET-}" ;;
+    *)  echo -e "${PURPLE_BLUE-}] ${GRAY238-}${_datum}${RED89-}[${RED126-}$$${RED89-}] ${CYAN60-}${msg}${RESET-}" ;;
+  esac
+} # end log
+
+function load_global_colors(){
+  [[ -z "${BLACK-}" ]] && BLACK="\\033[38;5;16m"
+  [[ -z "${BRIGHT_BLUE87-}" ]] && BRIGHT_BLUE87="\\033[38;5;87m"
+  [[ -z "${CYAN-}" ]] && CYAN="\\033[38;5;123m"
+  [[ -z "${CYAN60-}" ]] && CYAN60="\\033[38;5;60m"
+  [[ -z "${GRAY241-}" ]] && GRAY241="\\033[38;5;241m"
+  [[ -z "${GRAY200-}" ]] && GRAY200="\\033[38;5;200m"
+  [[ -z "${GRAY238-}" ]] && GRAY238="\\033[38;5;238m"
+  [[ -z "${GREEN-}" ]] && GREEN="\\033[38;5;22m"
+  [[ -z "${PURPLE_BLUE-}" ]] && PURPLE_BLUE="\\033[38;5;93m"
+  [[ -z "${PURPLE-}" ]] && PURPLE="\\033[01;35m"
+  [[ -z "${RED-}" ]] && RED="\\033[38;5;1m"
+  [[ -z "${RED89-}" ]] && RED89="\\033[38;5;89m"
+  [[ -z "${RED126-}" ]] && RED126="\\033[38;5;126m"
+  [[ -z "${RESET_PROMPT-}" ]] && RESET_PROMPT="[0m"
+  [[ -z "${RESET-}" ]] && RESET="\\033[0m"
+  [[ -z "${YELLOW220-}" ]] && YELLOW220="\\033[38;5;220m"
+  [[ -z "${YELLOW226-}" ]] && YELLOW226="\\033[38;5;226m"
+  [[ -z "${YELLOW-}" ]] && YELLOW="\\033[01;33m"
+  [[ -z "${FROM_MAGENTA_NOT_VISIBLE-}" ]] && FROM_MAGENTA_NOT_VISIBLE="\\033[39m\\033[38;5;124m"
+} # end load_global_colors
+load_global_colors
+
+function qdbus() {
+  local -i _err=0
+  >&2 log INFO qdbus "${*}"
+  (
+    eval """$(which qdbus) ${*:-}"""
+  )
+  _err=$?
+  [ ${_err} -gt 0 ] && >&2 log ERROR qdbus "${*}"
+} # end qdbus
+
+function pront() {
+  >&2 log INFO echo "${*}"
+  (
+    echo  """${*:-}"""
+  )
+} # end pront
+
+
+
+
+
+# Check input arguments
+function check_input_arguments() {
+    if [[ $# -ne 1 ]]; then
+        log ERROR "Usage: $0 <session_file>"
+        exit 1
+    fi
+}
+
+# Main function to process sessions
+function process_sessions() {
+    local session_file="$1"
+    if [[ ! -f "$session_file" ]]; then
+        log ERROR "Session file not found: $session_file"
+        return
+    fi
+
+    while IFS='|' read -r session_type title directory command split_option split_directory split_command; do
+       [[ "$session_type" == "" || "$session_type" == \#* ]] && continue
+       handle_session "$session_type" "$title" "$directory" "$command" "$split_option" "$split_directory" "$split_command"
+    done < "$session_file"
+	  #local -i counter=0
+		#local -i total=$(wc -l <"$session_file")
+		#while (handle_session <<< IFS='|' read -r $* ) && [ ${counter} -lt ${total} ]  ; do
+	  #		echo $(( ++counter ))
+		# done < "$session_file"
+}
+
+# Handle individual session based on type
+function handle_session() {
+    local session_type="$1"
+    local title="$2"
+    local directory="$3"
+    local command="$4"
+    local split_option="$5"
+    local split_directory="$6"
+    local split_command="$7"
+    echo "ojhala"
+	  [[ "$session_type" == "" || "$session_type" == \#* ]] && return 0
+
+
+    local session_id=$(add_tab "$title")
+    execute_command "$session_id" "$directory" "$command"
+
+    if [[ -n "$split_option" && -n "$split_directory" && -n "$split_command" ]]; then
+        execute_split_command "$session_id" "$split_option" "$split_directory" "$split_command"
+    fi
+}
+
+# Add a new tab and set the title
+function add_tab() {
+    local title="$1"
+    echo "Adding new tab titled: $title"
+    # Placeholder for tab creation logic
+    echo "new_session_id"  # Placeholder for new session ID
+}
+
+# Execute command in the specified session
+function execute_command() {
+    local session_id="$1"
+    local directory="$2"
+    local command="$3"
+    log DEBUG "Executing in session $session_id: cd $directory && $command"
+    # Placeholder for execution logic
+}
+
+# Handle split command execution
+function execute_split_command() {
+    local session_id="$1"
+    local split_option="$2"
+    local split_directory="$3"
+    local split_command="$4"
+    log DEBUG "Handling split for session $session_id: $split_option, running: cd $split_directory && $split_command"
+    # Placeholder for split handling and command execution
+}
+
+# Main execution block
+function main() {
+    load_global_colors
+    check_input_arguments "$@"
+    process_sessions "$1"
+}
+
+main "$@"
+

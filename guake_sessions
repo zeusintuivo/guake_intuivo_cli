@@ -105,7 +105,8 @@ function load_tabs() {
   else
   {
     >&2 log ERROR filename "Was not found. Expected $0 --debug 3 or $0 filename_list"
-    >&2 log INFO sample "#This is sample filename_list contents:
+    # >&2 log INFO sample "#This is sample filename_list contents:
+    >&2 echo "w 
     #	_sessions=\"
     simple|backend|/home/work/username/projects/api|bundle exec rails s|split|/home/work/username/projects/back|git pull|
     flat|frontend|/home/work/username/projects/front|npm run dev|split|/home/work/username/projects/front|npm run doc-center|

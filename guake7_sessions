@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+# Function to log messages
+function log() {
+    local type="$1"
+    local message="${@:2}"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [$type] $message"
+}
+
+# Load global colors
+function load_global_colors() {
+    : ${BLACK:="\033[38;5;16m"}
+    : ${CYAN:="\033[38;5;123m"}
+    : ${PURPLE:="\033[01;35m"}
+    : ${RED:="\033[38;5;1m"}
+    : ${RESET:="\033[0m"}
+}
+
+# Initialize the setup
+load_global_colors
+
+# Function to execute dbus-send commands with session management logic
+function execute_dbus_command() {
+    local command="dbus-send --type=method_call --dest=org.guake3.RemoteControl $@"
+    eval "$command"
+    local status=$?
+    if [ $status -ne 0 ]; then
+        log ERROR "Command failed: $command"
+        return $status
+    fi
+    return 0
+}
+
+# Parse type and percentage if any
+function parse_type_and_percent() {
+    local type_detail="$1"
+    if [[ "$type_detail" =~ (.*)-([0-9]+)$ ]]; then
+        echo "${BASH_REMATCH[1]} ${BASH_REMATCH[2]}"
+    else
+        echo "$type_detail 100"  # Default to 100% if not specified
+    fi
+}
+
+# Function to handle session loading from a file
+function load_sessions_from_file() {
+    local session_file="$1"
+    if [ ! -f "$session_file" ]; then
+        log ERROR "Session file not found: $session_file"
+        exit 1
+    fi
+
+    while IFS='|' read -r session_type title directory command split_options; do
+        [ -z "$session_type" ] && continue
+        log INFO "Processing $title with type $session_type"
+        local split_detail=($split_options)
+
+        # Initial tab and command execution
+        execute_dbus_command /org/guake3/RemoteControl org.guake3.RemoteControl.add_tab
+        execute_dbus_command /org/guake3/RemoteControl org.guake3.RemoteControl.execute_command "cd $directory && $command"
+        
+        # Handle splits and subsequent commands
+        local i=1
+        while [ $i -lt ${#split_detail[@]} ]; do
+            local split_type=${split_detail[$i]}
+            local next_directory=${split_detail[$((i+1))]}
+            local next_command=${split_detail[$((i+2))]}
+            i=$((i+3))
+            
+            read type percent <<< $(parse_type_and_percent "$split_type")
+            # Create split based on type and percent
+            case "$type" in
+                right|left)
+                    execute_dbus_command /org/guake3/RemoteControl org.guake3.RemoteControl.h_split_current_terminal "$percent"
+                    ;;
+                top|bottom)
+                    execute_dbus_command /org/guake3/RemoteControl org.guake3.RemoteControl.v_split_current_terminal "$percent"
+                    ;;
+            esac
+            # Execute command in the new terminal
+            execute_dbus_command /org/guake3/RemoteControl org.guake3.RemoteControl.execute_command "cd $next_directory && $next_command"
+        done
+    done < "$session_file"
+}
+
+# Main execution
+if [ "$#" -eq 0 ]; then
+    log INFO "Usage: $0 <session_file>"
+    exit 1
+fi
+
+load_sessions_from_file "$1"
+
