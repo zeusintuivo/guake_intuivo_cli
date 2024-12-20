@@ -544,8 +544,7 @@ delete_empty_lines() {
 disabled_encoding() {
   echo "encoding" \
   | curly_braket_open_encode \
-  | curly_braket_close_encode \
-  | echo "$0"
+  | curly_braket_close_encode
 }
 encode_script_to_save_spaces() {     # the order of decoding and encoding does matter
   enter_encode \
@@ -578,8 +577,7 @@ encode_script_to_save_spaces() {     # the order of decoding and encoding does m
 disabled_decoding() {
   echo "decoding" \
   | curly_braket_open_decode \
-  | curly_braket_close_decode \
-  | echo "$0"
+  | curly_braket_close_decode
 }
 
 
