@@ -191,7 +191,7 @@ fi
       fi
     done <<< "${FILENAME}"
 
-  elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+  elif [[ "$(cut -c1-5 <<< "$(uname -s)")" == "Linux" ]] ; then
     # Do something under GNU/Linux platform
     while read -r ONE_FILENAME; do
       # if not empty
@@ -211,7 +211,7 @@ fi
       fi
     done <<< "${FILENAME}"
 
-  elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+  elif [[ "$(cut -c1-10 <<< "$(uname -s)")" == "MINGW32_NT" ]] ; then
     # Do something under Windows NT platform
      echo "Not learned yet. nothing"
     # nothing here
@@ -480,7 +480,7 @@ get_file_chmod "${OUTPUT_FOLDER}/session.json"  &>/dev/null
 
      (( FLAGGITPROVIDER )) &&  [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(pbcopy < ${OUTPUT_FOLDER}/${DESIRED_WORK_FILE}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
   }
-	elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+	elif [[ "$(cut -c1-5 <<< "$(uname -s)")" == "Linux" ]] ; then
   {
 	  # Do something under GNU/Linux platform
 	  # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
@@ -489,7 +489,7 @@ get_file_chmod "${OUTPUT_FOLDER}/session.json"  &>/dev/null
      (( FLAGGITPROVIDER )) &&  [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(xclip -sel clip < ${OUTPUT_FOLDER}/${DESIRED_WORK_FILE}_rsa.pub)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
     # (( FLAGGITPROVIDER )) &&  echo "no xclip"
   }
-	elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+	elif [[ "$(cut -c1-10 <<< "$(uname -s)")" == "MINGW32_NT" ]] ; then
   {
 	  # Do something under Windows NT platform
      (( FLAGGITPROVIDER )) &&  [[ "${TEST_GIT}" ==  *"Permission denied"* ]] && $(cat ${OUTPUT_FOLDER}/${DESIRED_WORK_FILE}_rsa.pub | cpy)  && echo "------ Key Needs to be added in WebPAGE. Copied to CLipboard"
